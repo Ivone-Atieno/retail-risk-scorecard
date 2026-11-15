@@ -113,7 +113,7 @@ Rules fixed before scoring: a quarter is used only from its **public date**, a c
 - **Eleven core metrics** that every retailer reports: revenue, cost of goods, gross profit, inventory, total debt, current assets, current liabilities, equity, net income, operating cash flow, capex.
 - **Period:** quarterly history from 2014; failure events through 2024.
 
-![Data quality page](docs/images/page5_data_quality.png)
+![Data quality page](docs/images/data_quality.png)
 
 ##  6. Key insights
 
