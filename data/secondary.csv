@@ -1,0 +1,21 @@
+view,leverage,obs,companies,auc,pooled,above_half,loo,ci95,ci95_year
+controls within 3x (primary),lev2,49,19,0.658,0.67,15/19,0.64 to 0.69,0.53 to 0.78,0.52 to 0.86
+controls within 10x,lev2,49,19,0.669,0.68,16/19,0.65 to 0.70,0.55 to 0.78,0.54 to 0.85
+all held-out controls (no size match),lev2,49,19,0.674,0.682,16/19,0.66 to 0.71,0.55 to 0.78,0.55 to 0.85
+"within 3x, control companies only (no early quarters of later-failed)",lev2,49,19,0.657,0.67,15/19,0.64 to 0.69,0.53 to 0.77,0.52 to 0.86
+"vs design controls (frozen reference, no size match)",lev2,42,16,0.645,0.668,13/16,0.63 to 0.69,0.48 to 0.79,0.49 to 0.83
+"subgroup: debt on both dates, within 3x",lev2,42,17,0.673,0.669,14/17,0.65 to 0.71,0.50 to 0.81,0.50 to 0.92
+"horizon 3-6 months, within 3x",lev2,16,14,0.599,0.604,9/14,0.57 to 0.64,0.42 to 0.76,0.40 to 0.87
+"horizon 6-12 months, within 3x",lev2,33,17,0.713,0.701,14/17,0.70 to 0.75,0.57 to 0.85,0.57 to 0.92
+"horizon 12-18 months, within 3x",lev2,17,11,0.562,0.597,7/11,0.52 to 0.62,0.36 to 0.74,0.35 to 0.79
+"horizon 18-27 months, within 3x",lev2,18,10,0.426,0.44,4/10,0.39 to 0.47,0.26 to 0.59,0.26 to 0.63
+controls within 3x (primary),lev3,55,20,0.606,0.62,14/20,0.59 to 0.63,0.48 to 0.74,0.44 to 0.83
+controls within 10x,lev3,55,20,0.606,0.623,13/20,0.59 to 0.63,0.49 to 0.72,0.46 to 0.80
+all held-out controls (no size match),lev3,55,20,0.609,0.62,14/20,0.59 to 0.64,0.49 to 0.73,0.46 to 0.81
+"within 3x, control companies only (no early quarters of later-failed)",lev3,55,20,0.615,0.63,14/20,0.60 to 0.64,0.47 to 0.75,0.45 to 0.84
+"vs design controls (frozen reference, no size match)",lev3,47,18,0.562,0.606,10/18,0.54 to 0.59,0.39 to 0.72,0.39 to 0.82
+"subgroup: debt on both dates, within 3x",lev3,55,20,0.601,0.614,14/20,0.58 to 0.63,0.47 to 0.73,0.44 to 0.83
+"horizon 3-6 months, within 3x",lev3,17,15,0.561,0.565,9/15,0.54 to 0.60,0.39 to 0.72,0.35 to 0.86
+"horizon 6-12 months, within 3x",lev3,38,19,0.639,0.644,13/19,0.62 to 0.67,0.50 to 0.78,0.47 to 0.86
+"horizon 12-18 months, within 3x",lev3,23,16,0.655,0.642,12/16,0.63 to 0.69,0.48 to 0.81,0.33 to 0.82
+"horizon 18-27 months, within 3x",lev3,29,13,0.502,0.46,8/13,0.47 to 0.54,0.35 to 0.65,0.33 to 0.70

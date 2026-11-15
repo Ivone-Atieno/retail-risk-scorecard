@@ -1,0 +1,2209 @@
+Step 1 worked: 14,965 rows, all 20 companies, and none of the tags dropped out. The one real finding is that Costco’s 16-week fourth quarter was misclassified. Separately, the last-data dates in Check 1 raise a question about how much usable history the failed companies have.
+
+What the checks show
+
+Check 1: complete. Row counts mean little on their own, because each period appears once per tag and once per filed version. The row counts are not quarters. They only prove nothing is missing.
+
+Check 2: the classifier is clean.
+
+-   Balance items are 100% I.
+
+-   Flow items split into Q, YTD and A.
+
+-   OpCashFlow has 238 quarterly rows against 449 year-to-date rows, and Capex has 292 against 485. This confirms the differencing step is needed for both, with real numbers.
+
+Check 3: all 12 odd rows are Costco, at 111 days. I read that as Costco’s 16-week fourth quarter, which my 80–105 day rule missed. The Step 1b cell prints those rows so you can confirm they are year-end 10-K filings.
+
+Check 4: zero, so every tag in the coverage file produced rows.
+
+Insights
+
+1.  Costco’s reported Q4 is a free test. If those rows are the 16-week Q4, Costco reported it directly in three years. For those years I can compare reported Q4 against annual minus 36-week year-to-date. That tests the Q4 derivation on real data before we apply it to everyone.
+
+2.  The failed companies’ last data may be unusable. Check 1 shows last period ends, but the as-of rule cares about when each period was filed.
+
+    -   BBBY: its last period (2023-02-25) was filed 2023-06-14, after the 2023-04-23 bankruptcy.
+
+    -   PRTY: its filings after Sept 2022 look like they were filed in 2024, long after the Jan 2023 distress date.
+
+    -   EXPR and BIG: likely similar, because both filed after the distress date.
+
+    -   Those periods can’t count as “known before failure”. The real pre-distress history may be shorter than the table suggests, and this decides whether each failed company meets the 8-quarter minimum.
+
+3.  Healthy companies run to mid-2026, and failed ones stop earlier. Comparisons will be indexed as quarters before distress, not by calendar date.
+
+4.  Check these before trusting them. JOAN has the fewest rows (321), and CONN’s last filed date is its April 2024 10-K, so I can’t tell whether its next 10-Q was ever filed. I’m not claiming a cause for either yet
+
+Costco gave two results, one of them a correction to what I told you. Every failed company has at least 15 usable quarters, so the 8-quarter minimum is met. The table also changes my earlier reading of H4 (late filing), which I explain below.
+
+Costco
+
+-   The classification fix worked. The other column is gone, and the Q counts rose by exactly the Costco rows (Revenue +3, CostOfGoods +3, NetIncome +6).
+
+-   I said Costco reported its Q4 directly in three years. That was wrong: it’s two.
+
+    -   The three revenue rows cover only two periods: FY2019 Q4 (47.5bn, 2019-05-13 to 2019-09-01) and FY2020 Q4 (53.4bn).
+
+    -   The FY2019 figure appears twice because the FY2020 10-K repeated it as a comparative.
+
+    -   My guess is that Costco stopped giving a Q4 table when the SEC dropped that requirement, but I haven’t checked.
+
+-   The two reported Q4 figures are still a useful test. When we derive Q4 as annual minus the 36-week year-to-date figure, FY2019 and FY2020 should match these reported values.
+
+Usable history for the failed companies
+
+The as-of rule leaves 15 to 22 usable balance dates per failed company, so none is at risk on the 8-quarter minimum. Three things in the table matter.
+
+1.  There is a blind spot of 3.6 to 5.7 months before every bankruptcy. The last report available before the distress date ended 4 to 6 months earlier. The score can only describe a company as of its last report, not at the moment it failed. I’ll index quarters as qtrs_to_distress, so each company’s last usable report is quarter −1, and signals are read relative to that.
+
+2.  PRTY has the most excluded data. Four of its 19 balance dates were first filed after bankruptcy (Dec 2022 and the 2023 quarters, all filed in 2024). The as-of rule drops them from scoring, and PRTY keeps 15 usable dates.
+
+3.  I overstated the H4 evidence earlier. The BBBY 10-K (filed 2023-06-14) and PRTY’s 2023 quarters were late because the companies were already in bankruptcy.
+
+    -   BBBY’s 10-K was due around the time it filed (2023-04-23).
+
+    -   PRTY’s 2023 quarters were filed in 2024, long after its January 2023 filing.
+
+    -   That is evidence of what bankruptcy does to filing schedules, not a warning sign beforehand.
+
+    -   H4 has to be tested on the delay between period end and filing date in the quarters before distress, which is only possible for the usable periods.
+
+    -   Both documents say “early support (two cases)”, and I’ll correct that when I refresh them after cleaning.
+
+Two cases that could be genuine early signs, to check in the filing index:
+
+-   CONN: there is no 10-Q for the April 2024 quarter in the data, and its last filing before the July 2024 bankruptcy was the 10-K on 2024-04-18.
+
+-   EXPR: the 10-K for the year ending 2024-02-03 wasn’t filed until 2024-12-31. The distress date (2024-04-18) falls 75 days after year-end, so it isn’t yet clear whether it was late before bankruptcy or only because of it
+
+STEP 2
+
+What Step 2 tells us
+
+-   Row count didn’t change (14,965). That is the right result, because Step 2 only relabels dates and never drops a row.
+
+-   Five date groups merged: CONN, RAD and three for Kohl’s (KSS). I had expected only CONN and RAD. The Kohl’s groups differ by one or two days, such as 2019-05-02 against 2019-05-04.
+
+    -   Each time, the rule kept the date with more rows.
+
+    -   The kept dates look like the true fiscal period ends. CONN’s year ends on 31 Jan, and RAD’s and Kohl’s dates are Saturdays (Kohl’s 2019-05-04, 2019-08-03 and 2020-02-01; RAD 2019-03-02). That is my reading of the calendar, not something I checked against the filings.
+
+-   Only 26 to 68 rows per group are affected, well under 1% of the table. Left alone, those quarters would have been split in two. Differencing in Step 5 would then have looked for the previous year-to-date figure at the wrong date and reported a hole that isn’t real.
+
+-   I expect some earlier holes to disappear in the final table. The single-date holes for CONN at 2019-02-01 and RAD at 2019-03-03 (Capex, cost of goods, revenue, net income and others) were this duplicate-date problem. I’ll confirm that at the end.
+
+-   end_raw keeps the original date on every row, so any merge can be audited later.
+
+STEP 3
+
+Step 3 results
+
+-   Rows fell from 14,965 to 6,462, and no duplicate keys remain. Of the 6,462 periods, 1,590 appear in one filing only, and the rest repeat across up to 15 filings. Repeats come from 10-K comparatives and later restated filings, so a big drop is expected.
+
+-   The restatement table matches the earlier scan. All of these are the same as before, and I haven’t double-checked each one against the filings:
+
+    -   DBI gross profit: 16 periods, up to +36.25%.
+
+    -   M net income: 6 periods, −57.14% for FY2023.
+
+    -   RAD equity: 6 periods, −496% in one quarter.
+
+    -   PRTY equity: +96.48%.
+
+    -   CONN net income: −65.89%.
+
+    -   HD and TJX cash flow, plus the rest.
+
+-   Walmart revenue changed in 0 periods, matching the corrected finding.
+
+-   The DBI exception works. All 41 DBI gross-profit rows with several filed versions use the latest value.
+
+-   Two differences from the earlier scan:
+
+    -   RAD net income: 5 changed periods now, against 4 before (largest still −22.46%).
+
+    -   CONN current liabilities: 1 period at −5.23% that wasn’t in the earlier list at all.
+
+My best guess is that both are real restatements, and the date merge in Step 2 is what made them visible. The earlier scan treated the duplicate dates as separate periods, so a period reported under 2019-01-31 and again under 2019-02-01 never showed a difference. Merging put the two versions under one date. The check below will show if that’s true. If the periods are the merged dates (CONN 2019-01-31, RAD 2019-03-02), my guess holds. If not, I’ll look again.
+
+The check gave me two answers. I was wrong about RAD, and the CONN row is still unexplained.
+
+RAD
+
+My guess was that the extra RAD net income period came from the Step 2 date merge. The output shows it didn’t. The five RAD periods are 2022-02-26, 2022-05-28, 2022-08-27, 2023-03-04 and 2023-09-02. None is the merged date (2019-03-02). The extra one is the 2023-09-02 quarter, restated from −1,020.0m to −1,009.8m, a change of −1.003%.
+
+That is only just over the 1% line. The earlier scan likely rounded it to 1.00 and dropped it, though I can’t confirm what it did. It’s immaterial, and the other four RAD periods match the earlier scan exactly.
+
+CONN current liabilities
+
+The one CONN row is at 2019-01-31, which is a date the merge touched. First filed (2019-03-26) it was 237.6m, and the latest filing (2021-03-31) shows 225.1m, a change of −5.23%. That is consistent with my merge guess. It isn’t proof, because end_raw only shows the raw date of the first-filed version, not the other one.
+
+The effect is small. It’s the first balance date in the data (Jan 2019), and the as-of rule keeps the first-filed value, 237.6m. The sensitivity run later will carry the later value. I’m not spending more time on it unless you want the check.
+
+Step 3 is verified
+
+Aside from these two rows, the restatement table matches the earlier scan on every company and metric, so I’m treating the as-of values as correct and moving on.
+
+STEP 4
+
+Step 4 stitched every series correctly, and the gap report found fills for six company/metric pairs.
+
+Step 4 results
+
+-   Rows fell from 6,462 to 5,762. The dropped rows are alternate-tag rows that weren’t chosen, plus the COST gross profit and DBI cost of goods rows we derive instead.
+
+-   The five stitches behave as designed.
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Series            Tags used
+  ----------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  WOOF equity       26 periods from the “including noncontrolling interest” tag, then exactly 2 from StockholdersEquity (2026-05-02 and 2026-08-01). That is the hand-over we planned.
+
+  PLCE revenue      35 / 10 / 4 periods across three tags.
+
+  PRTY revenue      24 / 5. The 5 are the early 2019 quarters and year-to-date figures.
+
+  PLCE net income   44 / 7.
+
+  PLCE capex        29 / 11.
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-   No duplicate keys.
+
+The gap report
+
+These are periods where the chosen tag is empty but another tag has a number.
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------
+  Company / metric     Alternate tag                           Periods   What it would close
+  -------------------- --------------------------------------- --------- ------------------------------------------------------------------------------------
+  DBI net income       ProfitLoss                              19        Most of DBI’s net income holes
+
+  RAD capex            PaymentsToAcquireProductiveAssets       9         RAD capex holes (this tag is broader than PP&E)
+
+  EXPR cost of goods   CostOfGoodsAndServicesSold              4         The four fiscal-year-end holes
+
+  PLCE equity          including-noncontrolling-interest tag   3         The 2019 holes
+
+  PRTY equity          same tag                                2         The two 2023 holes (filed after PRTY’s bankruptcy, so these never reach the score)
+
+  PLCE cost of goods   CostOfGoodsSold                         1         One period
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+TGT cost of goods isn’t in the list. Its 5 missing periods (2020-05-02 to 2021-07-31) aren’t available under any other tag we extracted. I haven’t found the cause. The scan below looks for one.
+
+Step 4b
+
+Step 4b results
+
+Added (8 rows, all verified):
+
+-   EXPR cost of goods: four fiscal-year-end figures (FY2018 to FY2021).
+
+-   PLCE cost of goods: one year-end figure.
+
+-   PLCE equity: three 2019 quarters (280.4m, 249.3m and 254.4m).
+
+All of them agreed exactly (0.00%) with the primary tag where the two overlapped. The two COGS checks rested on only one overlapping period each, so that evidence is thin, but the match was exact. The EXPR fills are annual figures, so they only help us derive Q4 later.
+
+Rejected (the test did what it was for):
+
+-   DBI net income (ProfitLoss): the two tags differ by up to 198% across 29 overlapping periods. That could be a definition difference or a tiny number divided by a tiny number. I haven’t seen the rows. The 19 DBI net income periods stay empty. If net income turns out to matter for the DBI score, I’ll look at those rows then.
+
+-   RAD capex: the broader tag differs by up to 37.7%, as I suspected. The 9 RAD capex periods stay empty. Together with RAD’s 12 missing cash-flow dates, that makes RAD’s cash-flow ratios thin, so its signals will come from other metrics.
+
+-   PRTY equity: the difference is 1.04%, just over the 1% line. The two periods concerned were filed in 2024, after PRTY’s bankruptcy, so the as-of rule drops them anyway and nothing is lost.
+
+TGT cost of goods: my scan found no tag at all. It only looked at 3-month values under names containing “Cost”, “Sold” or “Merchandise”, so it could still miss something. I’m not chasing it further. TGT is one of the healthy controls, and the five missing quarters are 5 of about 30. They stay empty and are logged.
+
+STEP 5
+
+What the output shows
+
+The differencing logic holds up. Where a quarter could be checked against its rebuilt version, the two agree in nearly every case:
+
+  -----------------------------------------------------------------------
+  Metric              Quarters compared           Over 0.5% apart
+  ------------------- --------------------------- -----------------------
+  Revenue             265                         1
+
+  Cost of goods       223                         1
+
+  Net income          261                         9
+
+  Gross profit        131                         6
+  -----------------------------------------------------------------------
+
+The median difference is 0.0% throughout. Operating cash flow and capex are the exception. They are mostly derived (340 of 466 and 340 of 477 values), and only 1 and 9 quarters could be compared. Those ten agree to within 0.01%, but cash-flow differencing hasn’t been tested much. The annual sum-back check doesn’t test it either, because Q4 comes from the annual figure.
+
+Every mismatch traces to a restatement we already found.
+
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Mismatch                                                                      Cause
+  ----------------------------------------------------------------------------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  M net income, FY2023 (annual 105 vs quarters summing to 48; Q4 −128 vs −70)   The 105 was restated to 45. The reported Q4 of −128 equals the restated annual (45) minus the restated 9-month figure (173), so that quarter comes from a later filing.
+
+  CONN net income, FY2019 and Q4 FY2019 (5.1 vs 1.4)                            The earlier-scan restatements of the 2019 quarters.
+
+  PRTY gross profit, Q2 2020 (15.7 vs 18.4)                                     The earlier-scan restatement of the 2020 quarters.
+
+  M, other small net income differences (2.0 vs 1.0, 86 vs 87)                  Macy’s reports in whole millions, so rounding. Harmless.
+
+  DBI revenue, Q4 FY2019 (1.44%) and M cost of goods, FY2023 (0.54%)            Small restatements.
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+The holes are as expected.
+
+-   Gross profit: missing for companies without that tag (WMT, COST, TGT, TJX, ROST, KSS, M, JOAN and CONN), which Step 8 derives. PLCE and DBI cost of goods are also missing, to be derived from gross profit.
+
+-   TGT cost of goods: 6 holes, not 5. The sixth is probably Q4 of FY2020, which needs the 9-month figure that is itself missing.
+
+-   RAD operating cash flow: 10 holes, as known.
+
+-   DBI net income: 12 holes.
+
+-   JOAN, BGFV, PRTY, TUEM and COST: a few missing quarters each.
+
+Every company still has far more than the 8-quarter minimum.
+
+Two real problems
+
+1. The DBI gross profit series changes basis partway through. DBI restated gross profit upward by about 35% for 2022 and 2023, but only for some periods:
+
+-   Its annual figures and 2023 and 2024 quarters were restated.
+
+-   Older quarters and some year-to-date rows were never restated.
+
+-   That is why the DBI quarters in Check 2 fail so badly: 2024-02-03 (292.6 vs 556.5), 2023-07-29 (361.8 vs 187.2) and 2023-10-28 (345.7 vs 256.4). A restated annual figure minus an unrestated 9-month figure is not a real number.
+
+-   DBI’s quarterly margin series therefore jumps by roughly 9 percentage points around the change. That would look like an improvement in gross margin that never happened.
+
+This is a limit of what DBI filed, not a cleaning error. The restated figures simply don’t exist for the older quarters. The diagnostic below prints DBI’s margin by quarter so we can see exactly where the break sits. Then I’ll recommend how to handle it. The honest options are to treat the two stretches as separate segments, or to leave DBI out of the gross-margin test.
+
+2. My Step 5 dropped the filing date. The final as-of filter needs the date each quarter value first became public, because the distress cutoff is a filing date. I should have carried it through. The fix is in the next step:
+
+-   Each quarter keeps the latest filing date among the rows it was built from.
+
+-   Where a reported quarter and its rebuilt version disagree by more than 0.5% and more than $2m, the version with the earlier filing date wins (for M Q4, the original −70). The $2m floor is there because Macy’s rounds to whole millions.
+
+-   DBI gross profit keeps its own rule: reported quarters are kept.
+
+The unplaceable rows
+
+Check 5 reports 261 rows that couldn’t be placed on the quarter grid. The 15 rows printed are all from before each company’s first balance-sheet date (for example, WMT’s FY ending January 2019). That is expected. We can’t be sure about the other 246 from what was printed. The first diagnostic cell below classifies all of them. I expect nothing unexpected, and if there is something, it will print.
+
+Step 5 b
+
+Both diagnostics gave clear answers. The unplaced rows are harmless. DBI’s gross margin changes basis in 2023, so we need a rule for it before the quarterly table is final.
+
+A. The 261 unplaceable rows
+
+-   256 are expected: 191 end on or before each company’s first balance-sheet date, and 65 start before it. There is nothing to difference them against, and they cost us only the first quarter or two per company.
+
+-   5 are odd: PLCE net income annual rows with calendar-year dates (2021-01-01 to 2021-12-31, and the same for 2022 through 2025). Children’s Place’s fiscal year ends in late January, so these are not its fiscal years. I can’t tell what they are. They don’t fit the grid, so they never enter the quarterly table, and I’m leaving them out.
+
+B. DBI’s gross margin
+
+DBI’s series shows three things:
+
+-   COVID quarters: 2020-05-02 is −5.5% and 2020-08-01 is 7.6%. That settles the −5.5% minimum we flagged earlier for DBI as a real COVID store-closure quarter, not a data error. I haven’t confirmed TJX (−0.1%) and ROST (−2.6%) yet.
+
+-   Basis break: FY2022 quarters sit at 33–34% (2022-04-30 to 2022-10-29), and from 2023-04-29 the margin is 43–45% and stays there to 2026. The jump is about 10 points in one step. The restatement explains it. DBI’s restated FY2022 annual gross profit is 1,454.7m on revenue of 3,315.3m, a margin of 43.9%, which matches the post-2023 level. On the original basis the same year was 32.6%. This is a reclassification, not a business improvement.
+
+-   One impossible number: the quarter ending 2023-01-28 shows a derived gross margin of 78.6%. It is the restated annual figure minus an unrestated 9-month figure, which isn’t a real quarter.
+
+What I propose for DBI gross profit:
+
+1.  Drop the 2023-01-28 quarter. I won’t keep a number I know is wrong.
+
+2.  Tag each quarter with its basis: old through 2022-10-29, new from 2023-04-29.
+
+3.  Compare only within a basis. Trends use each segment on its own. The new-basis segment is the relevant one, with 14 quarters from April 2023 on. The old segment runs from May 2019 to October 2022.
+
+4.  No scaling of the old quarters up by 35%. That would be inventing numbers.
+
+5.  Run DBI-excluded and DBI-included in the sensitivity, so the conclusion doesn’t depend on this call.
+
+Step 5c
+
+What the 5c output tells us
+
+-   Rows: 2,577, down exactly one from 2,578 (the dropped DBI quarter), and none is missing a filing date.
+
+-   Conflict rule: it fired twice, both on Macy’s FY2023 Q4. Cost of goods took the original 5,076 over the restated 5,153, and net income took −70 over −128. That is the behaviour we wanted.
+
+-   Eight conflicts in total. I’d expected a short list, and it matches:
+
+    -   DBI gross profit (3 quarters): the reported, restated-basis values are kept, as agreed.
+
+    -   PRTY gross profit Q2 2020: reported 15.7 was filed earlier than the rebuilt 18.4, so it wins.
+
+    -   CONN net income (2020-01-31) and DBI revenue (2020-02-01): the reported and rebuilt values were filed on the same day, so the rule picked the reported one. CONN is 5.1 against 1.4, and DBI revenue is 829.6 against 817.7.
+
+-   CONN’s tie is small but unresolved. It leaves CONN’s FY2019 quarters adding to 59.7m against the annual 56.0m, 6.6% off. The gap is about 4m on a company with roughly 1.5bn of revenue. I’m logging it, not changing it.
+
+-   Sum-back check: 579 years tested, with 3 over 0.5%: CONN as above, PRTY gross profit FY2020 (1.2%), and M net income FY2023 (0.95%, which is just Macy’s whole-million rounding on a small base). The earlier M cost-of-goods offender is gone.
+
+-   Costco gave a real test. None of its quarters is in the conflict list, so its two reported Q4 figures (FY2019 and FY2020) match the rebuilt ones within 0.5%. That is the first real-data confirmation of the Q4 derivation. It isn’t tight, since 0.5% of Costco’s revenue is a few hundred million, but it didn’t fail.
+
+-   The as-of preview matches the earlier history table exactly. The last usable quarter-ends are BBBY 2022-11-26, RAD 2023-06-03, BIG 2024-05-04, PRTY 2022-09-30, JOAN 2023-10-28, EXPR 2023-10-28, TUEM 2022-10-01 and CONN 2024-01-31. That is an independent route to the same answer.
+
+  -----------------------------------------------------------------------
+  Company                  Quarter values first filed after distress
+  ------------------------ ----------------------------------------------
+  PRTY                     24 values, across 4 quarter-ends
+
+  BBBY, RAD, BIG           6 each, across 1 quarter-end
+
+  EXPR                     7, across 2 quarter-ends
+
+  JOAN, TUEM, CONN         0
+  -----------------------------------------------------------------------
+
+I haven’t identified EXPR’s second quarter-end. One is the year ending 2024-02-03 (its 10-K was filed 2024-12-31). The as-of filter handles it by filing date either way.
+
+STEP 6
+
+This applies the agreed rules. Reported values always win; the rule only fills empty quarters.
+
+-   Gross profit = revenue − cost of goods for WMT, COST, TGT, TJX, ROST, KSS, M, JOAN and CONN. Costco is derived in every quarter, because its reported tag was set aside earlier.
+
+-   Cost of goods = revenue − gross profit for PLCE and DBI. DBI keeps its basis tag (old or new), and the dropped quarter stays empty.
+
+-   
+
+-   A derived row’s filing date is the later of the two filing dates it came from.
+
+What the Step 6 output shows
+
+-   The rule closed the holes it was meant to close. It added 280 rows, matching the hole counts we saw earlier:
+
+  ------------------------------------------------------------------------------------------------------------------------------
+  Company             Rows added   Metric
+  ------------------- ------------ ---------------------------------------------------------------------------------------------
+  WMT, KSS, M, ROST   30 each      Gross profit
+
+  COST                29           Gross profit
+
+  TJX                 22           Gross profit
+
+  CONN                20           Gross profit
+
+  JOAN                13           Gross profit
+
+  TGT                 24           Gross profit (30 would be everything; 6 are missing because TGT’s cost of goods is missing)
+
+  PLCE                23           Cost of goods
+
+  DBI                 29           Cost of goods (the dropped quarter stays empty)
+  ------------------------------------------------------------------------------------------------------------------------------
+
+-   The derivation rule is validated. Where a company reports gross profit and cost of goods itself, revenue minus cost of goods reproduces the reported gross profit exactly (0.00%) across 11 companies. The one exception is PRTY (6.64%), which is the Q2 2020 restatement we already know about.
+
+-   Margins sit in believable ranges. WMT is about 24%, COST about 12.7%, TGT about 28%, HD about 33.7%, KSS about 42%, M about 39%, JOAN and CONN about 50%.
+
+    -   Costco’s 11.8–13.5% fits the membership-fee explanation, since its revenue includes membership fees. That fit is consistent with the explanation, not proof of it.
+
+    -   Not tested: Costco’s derived margin against its own reported gross profit. That was set aside by design.
+
+-   Every quarter below 10% falls between May and October 2020, consistent with the COVID store closures. That covers TJX (−0.1%), ROST (−2.6%), DBI (−5.5%), PLCE (−7.7%), EXPR (−22%), and PRTY (6.2%, 2020-06-30). That closes the open TJX/ROST/DBI outlier item. I haven’t checked each against its filing.
+
+-   One quarter per company is short on cost of goods: BGFV, JOAN and TUEM each have one quarter with a gross profit but no cost of goods. That doesn’t matter, because the gross-margin signal uses gross profit and revenue.
+
+-   Quarter counts per company.
+
+  -----------------------------------------------------------------------------
+  Company                            Quarters
+  ---------------------------------- ------------------------------------------
+  WMT, HD, TJX, ROST, KSS, M, PLCE   30
+
+  DBI                                29 usable (the dropped quarter excluded)
+
+  TGT                                24
+
+  EXPR, CONN                         20
+
+  RAD                                18
+
+  PRTY                               17
+
+  BBBY                               16
+
+  TUEM                               14
+
+  JOAN                               13
+  -----------------------------------------------------------------------------
+
+All are above the 8-quarter minimum. PRTY’s usable count drops to about 13 once the as-of filter removes its post-bankruptcy quarters.
+
+Two things to look at before analysis.
+
+-   TGT’s 33.7% maximum is well above its usual 26–30%. I don’t know which quarter it is.
+
+-   DBI’s latest quarter (2026-08-01) is 50.0%, against 42–45% for the previous quarters on the new basis. It is the most recent filing, so I’d like to see the quarter before trusting it. Step 7 prints both.
+
+STEP 7
+
+What the output shows
+
+-   Structure: 508 rows covering 20 companies, with the expected quarter-end dates. Two companies start late because their public history does: WOOF at 2021-01-30 and JOAN at 2020-05-02.
+
+-   The debt join worked perfectly. No debt rows went unmatched to the grid, and no dates had to be merged. The date-snapping is solid.
+
+-   No unit mistakes. Every ratio sits in a believable range, so the millions-to-dollars conversion is right.
+
+    -   Walmart’s current ratio is about 0.8 and Costco’s about 1.0.
+
+    -   Home Depot’s debt exceeds its current assets (1.0 to 1.7 times), and Petco’s is 1.4 to 2.1 times.
+
+-   Gaps are all known ones:
+
+  ----------------------------------------------------------------------------
+  Company                  Missing quarters   What
+  ------------------------ ------------------ --------------------------------
+  DBI                      12                 Net income
+
+  RAD                      10                 Operating cash flow
+
+  TGT                      6                  Cost of goods and gross profit
+
+  PRTY, JOAN, BGFV, COST   a few each         Cash flow or capex
+  ----------------------------------------------------------------------------
+
+None of them blocks the analysis.
+
+-   Debt flags carry through. WMT has 20 DIFF rows, which is the expected cross-check mismatch we reviewed earlier. Several companies are entirely no_check: TGT, HD, ROST, KSS, WOOF and RAD. The JUMP rows were the revolver draws we already reviewed.
+
+A first look at the hypotheses (not tests)
+
+Failed companies already look different on current ratio, the one measure I can read straight off Check 3:
+
+-   BBBY: the minimum is 0.44, and its debt reaches 1.52 times current assets.
+
+-   PRTY: the minimum is 0.39.
+
+-   Healthy companies: none goes below 0.76.
+
+-   BBBY’s gross margin has a median of 30.9% and a minimum of 15.9%.
+
+This is a first glance only. I haven’t tested timing, and the analysis stage will handle that properly.
+
+What I’m unsure about
+
+1. The 12 quarters with no debt value. BIG, EXPR, TUEM and BGFV have quarters with no debt row at all (BIG 4, EXPR 4, TUEM 3, BGFV 1). That could mean an undrawn revolver, which is a true zero. It could also mean a missing tag. I won’t fill them with zeros without evidence. Diagnostic A below prints each quarter next to its neighbouring debt values.
+
+2. Two companies show an unusually high latest quarter. TGT’s latest (2026-08-01) margin is 33.7%, and DBI’s is 50.0% against 42–45% before. Both are the most recent filings and the same period end. One company jumping alone could be real, but several together would point to a problem with how I rebuilt the latest quarter. Diagnostic B compares every company’s latest margin with a year earlier and shows where each value came from. Diagnostic C does the same for the two TGT quarters over 31%, which are 2019-08-03 (31.5%) and 2026-08-01 (33.7%).
+
+Step 7b
+
+Before I interpret this, I’m checking the two biggest latest-quarter jumps (ROST +6.2 and TGT +4.7 points) against what those companies actually reported for the quarter ending 2026-08-01.
+
+Diagnostic B turned up something real, not a data error. I checked the two biggest jumps against the companies’ own earnings releases, and the data matches them. The debt gaps need a decision, and one of them is a mistake in how I read the gap table earlier.
+
+B. The latest-quarter margin jumps are real (verified for two companies)
+
+I checked ROST and TGT against their SEC earnings-release exhibits for the quarter ending 2026-08-01:
+
+-   ROST: sales of $6,264.9m and cost of goods sold of $4,145.2m give 33.8%, against 27.6% a year earlier ($5,529.2m and $4,002.2m). Those are our numbers exactly. The release says the quarter includes about $253m of IEEPA tariff refunds, and that operating margin rose 610 basis points, 405 of them from the refunds.
+
+-   TGT: revenue of $26,539m, cost of sales of $17,603m and a gross margin of 33.7%, against 29.0% a year earlier. Again our numbers exactly (Diagnostic C shows reported and rebuilt agree). Target recognised $994m of IEEPA tariff refunds as a reduction of cost of sales, worth 3.7 points. Without them the margin rose about 1 point.
+
+The latest quarter for importers contains a one-time tariff refund. It isn’t a cleaning error. I only verified TGT and ROST. KSS (+2.8), TJX (+2.7), DBI (+6.4), M and WMT could have the same effect, and I haven’t confirmed that.
+
+Decision: flag every quarter ending 2026-08-01 as tariff_refund_quarter. Margin trends exclude it, and a sensitivity run shows what happens if it’s included. This doesn’t touch the failed companies. Their windows end in 2022–2024, so the comparisons will be matched on calendar periods.
+
+A correction to my earlier first-look. I called BBBY’s 15.9% minimum margin a sign of deterioration. That quarter ends 2023-02-25 and was filed 2023-06-14, after the bankruptcy. The as-of filter drops it, so nobody could have seen it beforehand. BBBY’s last usable quarter is 2022-11-26, and I’ll look at that one in the analysis. TUEM’s 22.0% against 28.8% a year earlier is also its last quarter, but that one was filed before its bankruptcy.
+
+A. The debt gaps, which are not all zeros
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Company   Gap                        What the neighbours say
+  --------- -------------------------- ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  BIG       2023-04-29                 Debt was 301.4m the quarter before and 493.2m the quarter after, so it can’t have been zero. This is a missing tag, inside BIG’s usable window, and it matters for the rising-leverage test.
+
+  BIG       2022-04-30, 07-30, 10-29   3.5m before and 301.4m after, with nothing between. Probably borrowing began during 2022, but I can’t tell from the table.
+
+  EXPR      four quarters in 2019      No value before the first row, and a reported 0.0 from 2020-02-01 on. Probably no borrowings then, and I’d treat that as zero only after confirming.
+
+  BGFV      2020-09-27                 35.0m before, 0.0m after. Probably the revolver was repaid.
+
+  TUEM      2020-03-31, 06-30, 09-30   Three quarters during its first bankruptcy, with nothing on either side to infer from. These stay as holes.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+The four BIG quarters matter most. To read the filings, use the filing reader, which prints every debt-related line. If debt_from_filing isn’t defined in your session, run this cell first (put your real name and email in HEADERS):
+
+Step 8
+
+What the filing output tells us
+
+BIG: our debt formula missed a tag. In all four BIG filings the balance sheet shows long-term debt under us-gaap:LongTermDebtNoncurrent. Our formula only looked for LongTermDebt|LongTermLineOfCredit, so it found nothing. The values are:
+
+  -----------------------------------------------------------------------
+  Quarter end                Long-term debt ($m)
+  -------------------------- --------------------------------------------
+  2022-04-30                 270.8
+
+  2022-07-30                 252.6
+
+  2022-10-29                 459.9
+
+  2023-04-29                 501.6
+  -----------------------------------------------------------------------
+
+This is a real borrowing build-up (revolver drawn from about $253m to about $502m) over the year before the BIG distress date (2024-09-05). That is exactly the kind of leverage signal H1 is looking for, and it would have been missing without this fix. These four are manual entries taken from the filings, not zeros.
+
+EXPR 2019-11-02: debt is zero, and the filing confirms it.
+
+-   Current liabilities of 570.058 equal 222.439 + 221.721 + 93.504 + 32.394, which is lease, payables, accruals and deferred revenue, with no borrowings line.
+
+-   Total liabilities of 1528.912 equal 570.058 + 936.547 + 20.049 + 2.258, which again has no debt.
+
+-   The other three 2019 EXPR quarters (2019-02-02, 05-04, 08-03) stay empty. They are probably zero too, but nothing has confirmed it, and I won’t fill them on a guess.
+
+BGFV 2020-09-27: that filing has no inline XBRL (older format), so it stays a hole. The three TUEM 2020 debt quarters also stay holes. Both are immaterial for the hypotheses.
+
+What the output shows
+
+The as-of filter works. All eight failed companies match the last-usable-quarter table from earlier. The rows reconcile: 508 − 500 = 8 dropped, which is BBBY 1 + RAD 1 + BIG 1 + PRTY 4 + EXPR 1. JOAN, TUEM and CONN show 0 dropped because their data already stops at the last quarter filed before distress. PRTY loses four quarters because it kept filing after its distress date, and those filings cannot be used.
+
+Nothing is below the 8-quarter minimum. Failed companies have 15 to 22 usable quarters, and most signals are within one or two quarters of complete. The gaps are:
+
+-   PRTY and JOAN revenue: 13 of 15.
+
+-   TUEM debt: 12 of 15, the three known 2020 holes.
+
+-   EXPR debt: 17 of 20.
+
+-   TGT gross profit: 24 of 31.
+
+TGT is in the healthy group and still has plenty of history, so it is fine. Each company loses its first year to year-on-year signals, which still leaves roughly 11 to 18 quarters of signal for each failed company.
+
+BIG debt: the JUMP flags are stale. The flags on 2022-01-29, 2023-01-28 and 2023-07-29 were computed before our fix, when the neighbouring quarters were empty, so they compared against gaps. The series is now 3.5 → 270.8 → 252.6 → 459.9 → 301.4 → 501.6 → 493.2 → 533.0. The dip to 301.4 in January 2023 looks like the usual holiday-season paydown of a revolver.
+
+The one value I haven’t confirmed is 3.5 at 2022-01-29. It came from our old formula, not from a filing, and it may be the same tag-miss problem. The year-on-year leverage change for January 2023 uses it. If that quarter shows up as extreme in CHECK 3 below, this is why. If it does, we run the filing reader on BIG’s January 2022 10-K.
+
+Smaller items:
+
+-   EXPR COGS (CHECK 3): one cost-of-goods value was first filed after distress and was removed. Gross profit is intact (19 of 20, same as revenue), and gross margin is built from gross profit, so no signal is affected.
+
+-   EXPR debt: both known quarters either side of the gap (2019-11-02 and 2020-02-01) are zero. The three 2019 holes are probably zero too, but they stay empty because nothing confirms it.
+
+-   Tariff flag: 10 rows, which is probably one per company with a quarter ending around 1 August 2026. Only TGT and ROST are verified. We’ll run the tests with and without these rows.
+
+-   DBI: 17 quarters are on the old gross-profit basis and 14 on the new. Step 9 blanks any year-on-year margin change that compares across that break.
+
+STEP 9
+
+What the Step 9 output shows
+
+1. The extreme values are almost all COVID, not distress.
+
+-   gm_chg_yoy peaks at ±50 points for PLCE (2021-05-01) and EXPR (2021-07-31 and 2020-05-02). Stores were shut in spring 2020, so margins collapsed. The same quarter a year later shows an equally large rebound against that weak base.
+
+-   inv_gap bottoms out for ROST, TJX and PRTY at 2021-05-01 and 2021-06-30. Sales rebounded by more than 100% against the closed-store quarter, so inventory looked like it was shrinking relative to sales.
+
+-   ocf_margin shows TJX at −72% in 2020-05-02, which is its closure quarter.
+
+-   lev_chg_yoy has ROST at +0.58 in 2020-05-02. That is consistent with healthy companies drawing credit lines in spring 2020 as a precaution. I haven’t verified this one against a filing.
+
+If we average these raw signals by group, COVID will dominate every comparison and H1–H3 would be measuring the pandemic. That is the main finding from this step.
+
+2. BBBY is the first real distress signal. Its leverage change is the top value in lev_chg_yoy at 2022-11-26 (+0.63), and also appears at 2022-08-27 (+0.53). That is the quarter just before its distress date, and it isn’t a COVID quarter. It is supportive of H1, but it’s one company, so nothing is tested yet.
+
+3. The filing-delay signal has a data problem. delay_chg_yoy has a minimum of −364 days. Normal values run from about −70 to +29 (1st and 99th percentiles). A swing of exactly a year means one quarter’s “first-filed date” is about a year off. I don’t yet know which rows are affected or why. The H4 test would be built on these, so Part A below traces them before anything is tested.
+
+4. Current ratio levels aren’t comparable across companies. CONN has a current ratio of 5.4 to 6.5 in 2019–2020. Its current assets include long-dated customer credit receivables, so the ratio reflects its business model, not liquidity. For the current ratio, the change within each company is more meaningful than the level.
+
+5. Negative equity is common (42 rows). Some of this will be healthy companies with big buybacks, so negative equity alone can’t be a distress signal. Part B breaks it down.
+
+6. The failed companies’ data is thinner, and not randomly. In CHECK 1 they have fewer values than the other groups: 70% against 78–79% for gross margin and 82% against 96% for operating cash flow. TUEM has only 5 fully-complete rows, and JOAN and PRTY have 9 each. Many first-complete rows also fall in 2020–2021, which is inside the COVID window. The composite score has to handle missing values without rewarding or penalizing a company for its gaps. The same rule has to hold for every company.
+
+7. BIG’s January 2022 debt value (3.5) is still unconfirmed. BIG’s January 2023 leverage change didn’t reach the top three, so CHECK 3 neither confirmed nor cleared it. Part C below lists it.
+
+The fix: compare each company to its healthy peers
+
+Instead of discarding about 2.5 years of quarters around COVID, I’d subtract the shared shock. For each signal and calendar quarter, I take the median of the healthy companies in that quarter (leaving the company itself out) and subtract it. I keep the raw signal and add a _rel column. A relative value of +5 then means the company did 5 points worse or better than healthy retailers in the same quarter, whatever the macro conditions. The same method should absorb the tariff-refund quarter. I’ll check that it does.
+
+Two limits to be aware of:
+
+-   The healthy group is only 6 companies, and I require at least 4 peers in a bucket, otherwise the value is left blank.
+
+-   Fiscal quarters end within about a month of each other (calendar-year companies like PRTY and TUEM are off by roughly one month from the January/April/July/October peers). That mismatch is accepted and I’ll note it in the write-up
+
+STEP 10
+
+What the Step 10 output shows
+
+1. My claim about the peer adjustment was wrong. I said it should shrink the COVID extremes. It didn’t: the range of gm_chg_yoy_rel is −48 to +51, against −49 to +51 raw. The reason is in D1. Healthy peers barely moved in 2020Q2 (gross margin change −0.66, inv_gap −10), because WMT, COST, HD and TGT stayed open. The extremes belong to apparel and discretionary names (EXPR, PLCE, TJX, ROST, PRTY), and the healthy median doesn’t describe them. The mock data couldn’t have shown this, because every mock company had the same shock.
+
+2. The adjustment does work for 2022 inventory. The healthy inv_gap median was +22, +29 and +32 points in 2022Q1–Q3. Healthy retailers’ inventory grew far faster than their sales, the well-known 2022 inventory glut. Several failed companies’ last quarters fall in that year, so unadjusted inv_gap would have blamed them for a problem everyone had. Keep the adjusted version for H2.
+
+3. A healthy company scores as high as the failed ones on leverage. ROST’s relative leverage change is +0.62 in 2020Q2 and again in 2020Q3. BBBY’s is +0.59 in 2022Q4, the quarter before its distress date. A score built on leverage change alone cannot separate them if COVID is left in, so the COVID window has to be dealt with directly.
+
+4. The BIG debt series now reads sensibly. Debt to current assets goes 0.000 → 0.002 → 0.177 → 0.191 → 0.301 → 0.234 → 0.409 → 0.437. The 3.5m in January 2022 is 0.2% of current assets, which fits a company drawing its revolver for the first time in April 2022. That is consistent with the filings but not confirmed against the January 2022 filing. I wouldn’t spend a lookup on it. The revolver draw itself is real, taken from the filings, and it matches what H1 predicts.
+
+5. The filing-delay outliers are an artifact, not late filers.
+
+-   JOAN’s 2020 quarters show a delay of about 398 days. JOAN only started filing in 2021, so its earlier quarters first appear as comparatives inside later reports. That is why “first filed” is a year after quarter end. The −364 rows and the 2022-01-29 −77 are all this. This is my likely explanation, not confirmed against the filings.
+
+-   WOOF’s 2021 balance sheet shows 131 days, the same −77 on 2022-01-29, probably for a similar reason. WOOF also IPO’d in early 2021. I’m less sure of that one.
+
+-   Normal delays top out around 93 days (PLCE). So a delay over 100 days isn’t an original filing and should be blanked.
+
+-   TUEM 2021-03-31 (−49) is probably genuine. Its prior-year quarter (spring 2020) was filed 78 days after quarter end, which fits SEC COVID filing relief plus TUEM’s own 2020 distress event. I haven’t verified it.
+
+6. Negative equity is not a clean signal.
+
+-   HD has 9 negative-equity quarters (healthy, from buybacks) and PLCE has 10 (under pressure).
+
+-   Five of the eight failed companies have some: EXPR 6, JOAN 6, RAD 5, BBBY 3 and PRTY 3.
+
+-   The level isn’t useful on its own. The better question is whether a company’s equity turns negative shortly before distress. We’ll test that in the analysis step.
+
+7. Usable history, with one correction. In Part D5, five failed companies (BBBY, BIG, CONN, EXPR, RAD) have a full last 8 quarters. JOAN and PRTY have 7, and TUEM has 5. That count wrongly treated JOAN’s artifact delay values as valid, so JOAN will likely drop to 6 once they are blanked. The count also required the delay signal, which only H4 needs. H1–H3 and H4 should be counted separately.
+
+Step 11
+
+What the Step 11 output shows
+
+1. The data-chosen window is not reliable. It flagged 2020Q2–Q4, 2021Q2–Q3 and 2022Q2, which has two defects.
+
+-   It missed 2021Q1 and 2021Q4. CHECK 5 still shows COVID leftovers in exactly those quarters:
+
+    -   EXPR inventory gap +53.5 at 2021-01-30.
+
+    -   ROST leverage change +0.56 at 2021-01-30.
+
+    -   CONN current-ratio change −2.7 at 2021-01-31.
+
+    -   EXPR gross margin +29 and inventory gap −45 at 2021-10-30.
+
+    -   TUEM inventory gap +44 at 2021-09-30.
+
+My spread measure is a median, so it ignores a handful of badly hit companies, and only EXPR, ROST, CONN and TUEM are extreme in those quarters. My own guess (2020Q2–2021Q3) was also one quarter short.
+
+-   It flagged 2022Q2, which isn’t COVID. That is the inventory-glut period, which the peer adjustment already handles.
+
+So the window is an analyst choice, not a measured fact. Step 12 runs the tests three ways: A, the data-flagged window as is; B, a contiguous 2020Q2–2021Q4; C, no blanking (peer-adjusted only). I treat B as primary. Any result that flips between variants gets reported as fragile.
+
+2. Blanking costs history. For H1–H3, the failed companies’ usable quarters out of the last 8 are:
+
+  -----------------------------------------------------------------------
+  Company       After blanking (window A)           Before blanking
+  ------------- ----------------------------------- ---------------------
+  BIG           8                                   8
+
+  CONN          7                                   8
+
+  EXPR          7                                   8
+
+  RAD           6                                   8
+
+  JOAN          6                                   7
+
+  BBBY          5                                   8
+
+  PRTY          4                                   7
+
+  TUEM          4                                   5
+  -----------------------------------------------------------------------
+
+PRTY and TUEM fail first (Sep and Oct 2022), so their last 8 quarters start in late 2020. Window B will cut another 1 or 2 from BBBY, RAD and PRTY. TUEM’s leverage also loses quarters because its three 2020 debt holes block the 2021 year-on-year figures. I’ll report PRTY and TUEM separately and flag them as thin. I won’t drop them quietly.
+
+3. The delay cleaning worked, with one correction to my earlier explanation. It blanked 10 rows, all JOAN or WOOF.
+
+-   JOAN’s 398-day rows are 2020 quarters that first appear as comparatives in later reports.
+
+-   JOAN’s 2021-01-30 (125 days) and WOOF’s 2021-01-30 (131 days) look different. Both IPO’d in early 2021, so these are probably their first 10-Ks, filed on new-registrant timing, not comparatives. That is my inference, not verified. Either way they aren’t ordinary delays.
+
+-   The remaining delay extremes are modest (−39 to +38 days). DBI’s −39 and +38.5 are probably one late filing in spring 2020 counted twice, once as the base and once as the comparison. Not verified. So the H4 signal is small.
+
+4. What the cleaned extremes tell us.
+
+-   BBBY leverage +0.59 (2022-11-26) is still the top value. It is the one clear H1 case so far. ROST’s +0.56 is COVID borrowing still on its balance sheet in 2021Q1, which window B should remove.
+
+-   PRTY leverage −0.54 at 2022-06-30 is suspicious. Leverage fell sharply about three quarters before the distress date, the opposite of H1. Companies rarely de-lever before failing. It may be real, or our debt formula may have dropped a reclassified or current portion. Step 12 Part 0 prints the debt detail to check.
+
+-   Operating cash flow margin: PLCE is at −47% and −37% (2024), and PRTY is at −43% in its last usable quarter. These are plausible cash burn at pressured or failing companies, but unverified. Operating cash flow isn’t part of H1–H4, so I’m not drawing conclusions from it.
+
+-   Current ratio: CONN’s extremes appear even before COVID (+2.27 at 2020-01-31) because its current assets include customer receivables. This signal measures the receivables book, not liquidity. I’m dropping the current ratio from the score. None of H1–H4 needs it.
+
+5. The sample limits what a test can prove. There are 8 failed companies. An exact sign test needs 8 of 8 to reach p < 0.05, and 7 of 8 gives about 0.07. The results are therefore exploratory and descriptive. With several signals and three variants, a lone “significant” result isn’t strong evidence.
+
+STEP 12
+
+What the Step 12 output shows
+
+This is the first real test, and the evidence is mostly weak. The sample is 8 failed companies, so the honest reading is “mixed”.
+
+H1 is not supported as stated.
+
+-   Gross margin: 6 of 8 failed companies fell in the predicted direction in the primary variant (p = 0.29), and the count slips to 5 and then 4 in variants A and C. The size of the effect also shifts: the median-of-medians is −2.2 points in B, −0.5 in A and −0.4 in C. A result that moves this much with the window is fragile.
+
+-   Four companies carry the effect. BBBY (−5.3), TUEM (−6.2), EXPR (−4.5) and PRTY (−3.4) fell sharply. CONN and JOAN did not (+0.2 each). Under-pressure companies also drift negative against healthy peers, and the failed group is worse than under-pressure in only 4 of 8. So gross margin does not separate failing from merely stressed.
+
+-   Leverage: 6 to 7 of 8 moved the predicted way across the variants (p = 0.07 to 0.29). Direction is consistent, but it isn’t conclusive. The misses are EXPR (−0.03) and PRTY (−0.04), both close to zero.
+
+-   Joint (margin down and leverage up): 4 of 8 in A and B (BBBY, BIG, RAD, TUEM) and 3 of 8 in C. p is 0.11 or worse. BBBY and TUEM have only 4 usable quarters each.
+
+H2 as stated is not supported either. 5 of 8 had inventory outgrowing sales (p = 0.73), and only 4 of 8 were worse than under-pressure. The company detail splits in two:
+
+-   CONN +12, EXPR +13, PRTY +9, BIG +7 (inventory building).
+
+-   RAD −13, TUEM −16 (inventory shrinking against sales).
+
+Shrinking inventory is a recognised failing-retailer pattern, because suppliers cut credit and stores close. But that is a new idea chosen after seeing these numbers. If we test it, it will be labelled exploratory (H2b), never swapped in for H2.
+
+The one pattern that held up is in the trend. The inventory gap was higher in the last 4 quarters than in quarters 5–8 in 5 of 5 companies in B (CONN, EXPR, BIG, JOAN, RAD), 6 of 8 in A and 7 of 8 in C. I built that “worsening into failure” column into Step 12 before seeing the results, so it is fair to cite. Still, it is 12 tests on 8 companies, and p is about 0.06 to 0.07 at best.
+
+H4 is not supported, and my sign test misread it. The median delay change is 0.0 for almost every company. TUEM (+12) and CONN (+6 near the end) are the only moves. My test counted a tie of exactly zero as “not later”, so variants A and C show 1 of 8 and p = 0.07 for H4. That looks like “filed earlier”, but it isn’t. It means most companies filed on the same schedule as before. That was a flaw in my test design. Step 13 drops ties, as a standard sign test does. Filings after the distress date are already excluded, and the earlier BBBY/PRTY lateness was driven by bankruptcy, so the pre-distress window is the fair test. It found nothing.
+
+PRTY leverage: the debt did not fall. Part 0 shows total debt rising from 1,460m (Jun 2021) to 1,580m (Jun 2022) and then 1,784m (Sep 2022). The revolver draw (LinesOfCreditCurrent) went from 232m to 443m in the last quarter before failure. That is exactly the H1 signal. The −0.54 came from the denominator. My most likely explanation is that PRTY’s inventory build in 2022 inflated current assets, which pulled down debt divided by current assets. I haven’t seen the current-asset figures yet, so Step 13 prints them. If that is right, debt divided by current assets is a flawed leverage measure for retailers that stock up before failing, and the PRTY miss is partly my measurement choice.
+
+The DIFF flags on PRTY look like our total including the revolver while gross_m appears to be term-debt principal only. They don’t look like data errors.
+
+STEP 13
+
+Step 13 insights, rewritten with the PRTY output
+
+1. PRTY is now fully accounted for
+
+The four values behind its median are −0.144, −0.088, +0.050 and +0.099 (the peer-adjusted column). The median of those four is the average of the middle two: (−0.088 + 0.050) / 2 = −0.019. That matches Part 2, so my earlier explanation was incomplete. The fourth quarter (2021-12-31) is a large negative reading, and I had only seen three.
+
+The sign flip between variants is now directly confirmed. Variant A flags 2022Q2 and blanks PRTY’s 2022-03-31 quarter, which leaves −0.144, +0.050 and +0.099. The median is then +0.050, so PRTY is positive in A and negative in B and C.
+
+The two negative readings are a COVID base effect, and I can show it from your numbers.
+
+-   The four-quarter sales total rose from 1,863 (Mar 2021) to 2,145 (Jun 2021). The difference, 282, equals Q2 2021 sales minus Q2 2020 sales.
+
+-   Q2 2021 sales are 536, so Q2 2020 sales were about 254m, less than half of the 536m a year later. This is derived by subtraction from displayed figures, so it is good to about ±1m.
+
+-   The four-quarter total is also verified for PRTY: 536 + 510 + 698 + 433 = 2,177, which matches the 2022-03-31 total in the Step 13 Part 0 table.
+
+-   PRTY’s quarterly sales in 2022 were flat against 2021 (433 vs 427, 527 vs 536, 502 vs 510). So the fall in debt to sales in early 2022 is the pandemic quarter dropping out of the denominator, not deleveraging.
+
+The levels tell the real story: 0.662 → 0.715 → 0.729 → 0.826 across 2022, rising every quarter. Read properly, PRTY’s leverage was climbing before failure, so it is probably not a real exception to H1.
+
+But I’m not recounting it. Under the rule I set in advance, PRTY still counts as a miss (7/8). Flipping it because I now know why it looks wrong would mean choosing a data rule after seeing which way it helps. The write-up says 7/8, with a note that two of PRTY’s four readings are an artifact.
+
+2. The window has a design flaw
+
+My window blanks a row by the calendar quarter of the current quarter. A year-on-year change in a four-quarter total reaches back about 7 quarters. So variant B removes COVID quarters from the current side but not from the base side, and the leverage signal is contaminated into 2022.
+
+The bias runs in a consistent direction for companies whose sales collapsed and then recovered: debt to sales falls mechanically, so the signal understates their leverage rise. For those companies the H1 result is, if anything, conservative. I’ve shown that for PRTY only. For other companies it is an inference.
+
+3. The new leverage measure shrinks the sample
+
+It needs 8 consecutive quarters of sales plus debt. Under variant B, BBBY, JOAN, PRTY and TUEM have only 4 usable quarters each. JOAN dropped from 8 usable quarters under the old measure to 4 under the new one. So “old 6/8 versus new 7/8” is not a like-for-like comparison.
+
+4. Leverage verdict
+
+-   Direction: 7 to 8 of 8 failed companies moved up against peers, across all three variants.
+
+-   Size: clearly above under-pressure levels for CONN (+0.12), BBBY (+0.10), JOAN (+0.07) and BIG (+0.05). BBBY and JOAN each rest on 4 quarters.
+
+-   Cautions that still apply:
+
+    -   PRTY is a measurement artifact in two of its four readings.
+
+    -   I chose the new measure after seeing the old one.
+
+    -   The remark that CONN’s debt reflects its credit book is my background knowledge, not something in your data. I haven’t verified it.
+
+-   Status: suggestive, not established.
+
+5. The other items
+
+-   H1 joint (margin down and leverage up): 5 of 8 by sign in A and B (p = 0.027) and 4 of 8 in C (p = 0.114). I verified the list of five (BBBY, BIG, EXPR, RAD, TUEM) for variant B only. I haven’t seen the lists for A and C. EXPR and RAD count only because their rises are tiny but positive. I’d lean on this result lightly.
+
+-   H4: unchanged, not supported. Two corrections: I compared CONN’s +7.5 days (a trend) with TUEM’s +12 days (a level), which aren’t the same thing, and “most failed companies” should have said 5 of 8.
+
+  ----------------------------------------------------------------------------------------------------------------
+  Hypothesis   Status
+  ------------ ---------------------------------------------------------------------------------------------------
+  H1           Suggestive for leverage. Weak for gross margin and for the joint result. Not established.
+
+  H2           Not supported as stated. The inventory gap rose toward failure in 5 to 7 companies (exploratory).
+
+  H4           Not supported.
+
+  H3           Not yet tested.
+  ----------------------------------------------------------------------------------------------------------------
+
+STEP 14
+
+What the Step 14 output shows
+
+Headline for H3: modest ranking power in the last year before distress, which fades earlier and is carried by leverage.
+
+1. Last 4 quarters: about 0.7 in every combination.
+
+-   Mean AUC is 0.680 to 0.725 across all 12 combinations (variants A/B/C × lev2/lev3 × core/full).
+
+-   Read it as: pick one failed company and one control company in the same calendar quarter, and the failed one scores riskier about 70% of the time.
+
+-   The bootstrap intervals all sit above 0.5, with lower bounds of 0.56 to 0.61.
+
+-   7 of 8 companies are above 0.5 in 9 of the 12 combinations, and 6 of 8 in the other 3.
+
+-   The sign test reaches p = 0.070 at best (7/8) and 0.289 for 6/8, so none is below 0.05.
+
+-   The two tools disagree because the bootstrap resamples only 8 companies and ignores noise on the control side, so it is probably too tight. I trust the sign test’s caution more. A fair summary is “around 0.7, probably above 0.5, but 8 companies can’t pin it down”.
+
+2. The 12 combinations are not 12 confirmations. They use the same data with different measurement choices. What they do show is that the result doesn’t depend on my choices. The window variant makes almost no difference to the last-4 result (lev2 core is 0.683 in A, B and C), and the two leverage measures agree (0.683 vs 0.704 in B). That settles the worry that led me to revise Step 14.
+
+3. Earlier quarters: no reliable signal.
+
+-   For quarters 5–8, AUC is 0.55 to 0.64, and the interval includes 0.5 in 11 of 12 combinations (the exception is A with lev3 core, 0.52 to 0.74).
+
+-   Different companies are scored in each window (4 to 8), so the comparison with the last-4 result is not like for like.
+
+-   Per company (lev2, B), among those with both windows, the score rises toward failure for CONN (0.72 → 0.83), EXPR (0.35 → 0.84) and RAD (0.30 → 0.43). It falls for BIG (0.82 → 0.62). That is 3 of 4, too few to call a trend.
+
+-   My earlier estimate was that the last four quarters sit roughly 4 to 15 months before distress, because of the 3.6 to 5.7 month gap before the last filing. Step 15 Part 1 prints the actual figures.
+
+4. The score is carried by leverage.
+
+-   Single-signal percentiles in Part 3: leverage 0.79 (lev2) and 0.71 (lev3), both 7 of 8. Gross margin 0.58 (4/8), inventory gap 0.60 (4/8) and filing delay 0.60 (5/8) are close to coin flips.
+
+-   This matches the earlier results: H1’s margin part, H2 and H4 were all weak.
+
+-   The equal-weight core score (0.68 and 0.70) is no better than leverage alone. With lev2 it is worse (0.79 alone vs 0.68). The two weak signals dilute it. The samples are roughly comparable but not identical.
+
+-   I’m not re-weighting toward leverage. The equal weights were fixed in advance. Tuning weights on the same 8 failed companies would just fit them. The ablation in Step 15 is diagnostic only.
+
+-   Adding delay gives inconsistent results: better with lev2 (0.719 vs 0.683), worse with lev3 (0.685 vs 0.704). That is consistent with H4 having no signal.
+
+5. Misses. RAD (0.43 and 0.51) and JOAN (0.55 and 0.50) are near coin flips. EXPR (0.84, 0.85), BBBY (0.83, 0.80) and CONN (0.83, 0.77) score best.
+
+6. Sanity check: the ordering is sensible, but not a fair comparison yet. Under-pressure companies score above healthy ones (0.62 with lev2, 0.54 with lev3), which sits between healthy (0.5 by construction) and failed (0.68 to 0.70). But the failed companies are compared against healthy plus under-pressure, while this check compares under-pressure against healthy only. Step 15 Part 3 puts both on the same footing. Other points from Part 4:
+
+-   KSS (0.48, 0.45) and WOOF (0.47, 0.45) score below 0.5 under both versions.
+
+-   BGFV is 0.92 under lev2 and missing under lev3. My guess is that its debt was zero a year earlier, which blanks lev3, but I haven’t checked.
+
+7. Limits that apply to everything above.
+
+-   It is all in-sample, on 8 companies chosen with hindsight.
+
+-   I refined the leverage measure and the window after seeing earlier results.
+
+-   The control group is only about a dozen companies per quarter, so percentiles are coarse.
+
+What about the planned sensitivity runs?
+
+-   Tariff-refund quarters: these end in 2026, and every failed company’s last usable quarter ended between 2022-11 and 2024-05. They cannot touch H1–H4 or H3. They matter only when scoring the live companies.
+
+-   Earliest-filed vs latest-filed values: the signals use gross margin, revenue, inventory and debt. The restatements we found hit DBI gross profit and net income, equity and cash flow for other companies. DBI is a control, which Step 15 Part 3 covers by dropping it. I’d rank this as low value.
+
+-   Finance leases in debt: this is the one that could move leverage, which carries the score. It needs the debt table rebuilt with and without leases. It is a separate step.
+
+STEP 15
+
+RESPONSE FROM GPT
+
+Data analyst interpretation of your results
+
+Your results suggest that the distress prediction score contains a meaningful signal, particularly from leverage, and that it may identify financial distress before a company fails. However, its predictive performance depends on the comparison group, and the results do not yet establish that the score can reliably predict failure two years in advance.
+
+I would interpret the four parts together rather than treating each table as a separate result. The key questions are:
+
+-   Timing: How far ahead of distress does the score provide a warning?
+
+-   Robustness: Does the model perform reasonably well when individual failed companies are excluded?
+
+-   Discrimination: Can the score distinguish failed companies from healthy companies, and does it distinguish them from under-pressure companies?
+
+-   Signal contribution: Which financial indicators contribute most to the score's performance?
+
+1. Part 1 — How early does the score provide a warning?
+
+Months between quarter-end and distress date for failed companies
+
+  ------------------------------------------------------------------------
+  Quarter-to-distress group         Minimum       Median     Maximum
+  --------------------------------- ------------- ---------- -------------
+  QTD 1                             3.6           4.5        5.7
+
+  QTD 2                             6.6           7.5        8.7
+
+  QTD 3                             9.6           10.6       11.8
+
+  QTD 4                             12.5          13.6       14.8
+
+  QTD 5                             15.6          16.6       17.7
+
+  QTD 6                             18.6          19.5       20.7
+
+  QTD 7                             21.6          22.5       23.8
+
+  QTD 8                             24.5          25.5       26.8
+  ------------------------------------------------------------------------
+
+What the data tells us
+
+The median time to distress increases consistently from 4.5 months in QTD 1 to 25.5 months in QTD 8.
+
+4.5
+
+months
+
+QTD 1: near-term warning
+
+The median observation is about 4½ months before distress.
+
+13.6
+
+months
+
+QTD 4: approximately one year
+
+The median observation is around 13.6 months before distress.
+
+25.5
+
+months
+
+QTD 8: longer-term warning
+
+The median observation is more than two years before distress.
+
+Important distinction: this table establishes the timing of your observations relative to distress. It does not, by itself, prove that the score can predict distress at every one of those lead times. That requires evaluating predictive performance separately for each forecast horizon.
+
+If QTD 1–4 are the most recent four quarterly observations, the results indicate that those observations span approximately 3.6–14.8 months before distress, with median lead times of 4.5–13.6 months.
+
+Analytical conclusion: your score's potential early-warning horizon may extend beyond one year, but the next step is to test whether its discrimination remains useful at the longer lead times.
+
+2. Part 2 — Is the model's performance dependent on one failed company?
+
+The baseline mean AUC is 0.683 for lev2 and 0.704 for lev3. You then excluded one failed company at a time to test whether the results were being driven by a single case.
+
+Key results
+
+Baseline · lev2
+
+0.683
+
+Mean AUC
+
+Baseline · lev3
+
+0.704
+
+Mean AUC
+
+Mean AUC range after excluding one company
+
+lev2
+
+0.6620.720
+
+lev3
+
+0.6830.733
+
+Range of leave-one-company-out AUC values; the bars are illustrative, not a performance scale.
+
+What stands out?
+
+Finding 1: No single company appears to determine the entire result.
+
+Neither leverage variant collapses to an AUC near 0.50 when a company is excluded. This is encouraging evidence of robustness to individual-company exclusion.
+
+However, it is not proof that the model generalizes to new companies. The sample is small, and all evaluations may share other sources of bias.
+
+Finding 2: EXPR and BBBY have a noticeable influence, but they do not explain all the performance.
+
+  -----------------------------------------------------------------------
+  Company excluded                    lev2 AUC          lev3 AUC
+  ----------------------------------- ----------------- -----------------
+  None                                0.683             0.704
+
+  EXPR                                0.661             0.683
+
+  BBBY (old)                          0.662             0.689
+
+  CONN                                0.662             0.694
+
+  JOAN                                0.703             0.733
+
+  RAD                                 0.720             0.731
+  -----------------------------------------------------------------------
+
+Excluding EXPR or BBBY reduces AUC for both variants. Excluding CONN also lowers performance. These companies appear to contribute to the model's overall discrimination.
+
+Conversely, removing JOAN or RAD improves performance. This suggests that the model may have more difficulty distinguishing those companies' distress patterns from the controls.
+
+Finding 3: lev3 is consistently stronger than lev2 in this experiment.
+
+The full-sample AUC is 0.704 for lev3, compared with 0.683 for lev2. The lev3 result also exceeds lev2 in every leave-one-company-out row.
+
+This is a consistent descriptive advantage, although a difference of 0.021 in mean AUC is not necessarily statistically significant.
+
+Conclusion for Part 2: The score is not obviously dependent on a single failed company. lev3 appears more robustly discriminative in this analysis, but confidence intervals or resampling tests would help establish how reliable that advantage is.
+
+3. Part 3 — Does the choice of control group change the results?
+
+This is arguably the most important section because the control group determines what your model is actually being asked to distinguish.
+
+Mean AUC by control group
+
+Comparison of lev2 and lev3 across the supplied control-group experiments.
+
+[Chart]
+
+■ lev2
+
+■ lev3
+
+Finding 1: Healthy-only controls produce substantially higher AUCs
+
+-   Baseline controls: 0.683 (lev2) and 0.704 (lev3).
+
+-   Healthy-only controls: 0.811 (lev2) and 0.815 (lev3).
+
+The improvement is 0.128 for lev2 and 0.111 for lev3.
+
+This is a substantial difference. It suggests that the score distinguishes failed companies from healthy companies more effectively than it distinguishes them from the mixed baseline group, which includes healthy and under-pressure companies.
+
+That is an important practical insight: detecting outright failure may be easier than distinguishing failure from financial weakness that has not yet progressed to failure.
+
+The healthy-only results are promising, but they should not be interpreted as proof of real-world predictive accuracy without checking the validation design and the representativeness of the healthy controls.
+
+Finding 2: Removing DBI barely changes the baseline result
+
+  ------------------------------------------------------------------------
+  Control-group scenario                       lev2          lev3
+  -------------------------------------------- ------------- -------------
+  Baseline                                     0.683         0.704
+
+  Without DBI                                  0.688         0.701
+
+  Change                                       +0.005        -0.003
+  ------------------------------------------------------------------------
+
+The changes are very small. DBI does not appear to be the main driver of the baseline results, although this alone does not establish that DBI is irrelevant.
+
+Finding 3: BGFV has a more complicated effect
+
+Removing BGFV increases lev2 AUC from 0.683 to 0.729, but reduces lev3 AUC from 0.704 to 0.688.
+
+Removing both DBI and BGFV gives AUCs of 0.722 and 0.688, respectively.
+
+This suggests that the influence of the control companies differs between the two leverage variants. BGFV may affect their relative performance differently, so it would be premature to conclude that one control company is universally responsible for the observed results.
+
+An important limitation
+
+Your Part 3 table does not provide a separate AUC for under-pressure controls alone. Therefore, it cannot establish the full ordering:
+
+\[ \text{Failed} > \text{Under-pressure} > \text{Healthy} \]
+
+The healthy-only comparison supports the conclusion that failed companies are more distinguishable from healthy companies than from the mixed baseline. To test the proposed ordering, you need the failed-versus-under-pressure and under-pressure-versus-healthy results under a consistent evaluation design.
+
+Conclusion for Part 3: Control-group composition materially affects the reported AUC. The model performs best against healthy-only controls, while the more challenging mixed-control comparison produces lower results. That distinction matters when deciding how the score should be used.
+
+4. Part 4 — Which financial signals contribute most?
+
+This analysis removes one signal at a time from the existing score. It is a diagnostic experiment, not a new optimized score.
+
+Comparison of mean AUC
+
+Effect of removing individual signals
+
+Mean AUC for each signal-removal experiment, compared with the all-three-signals baseline.
+
+[Chart]
+
+■ lev2
+
+■ lev3
+
+Finding 1: Leverage appears to be the strongest contributor
+
+Removing leverage reduces AUC to 0.608 for both variants.
+
+  ------------------------------------------------------------------------
+  Variant      Full score       Without leverage             Change
+  ------------ ---------------- ---------------------------- -------------
+  lev2         0.683            0.608                        -0.075
+
+  lev3         0.704            0.608                        -0.096
+  ------------------------------------------------------------------------
+
+This is the clearest signal in Part 4.
+
+Leverage appears to contribute substantially to the score's ability to discriminate failed companies from the controls. However, an AUC of 0.608 is still above 0.50, meaning the remaining signals retain some discrimination.
+
+Interpretation: The score is leverage-sensitive, but the evidence does not justify calling it merely a leverage score. The other indicators may still add useful information.
+
+Finding 2: Gross margin has a mixed contribution
+
+-   lev2: removing gross margin increases AUC from 0.683 to 0.694.
+
+-   lev3: removing gross margin decreases AUC from 0.704 to 0.681.
+
+Gross margin appears to slightly reduce performance in lev2, but removing it harms lev3.
+
+This is not consistent evidence that gross margin is simply noise. Its contribution may depend on how the leverage variant is defined or how the indicators interact.
+
+Finding 3: Inventory gap also has a mixed contribution
+
+-   lev2: removing inventory gap raises AUC from 0.683 to 0.710.
+
+-   lev3: removing inventory gap lowers AUC from 0.704 to 0.684.
+
+The improvement of 0.027 for lev2 is the largest positive change observed when a single signal is removed. This suggests inventory gap may be weakening the discrimination of that particular variant.
+
+But for lev3, the opposite occurs. Removing inventory gap reduces AUC by 0.020.
+
+Interpretation: Inventory gap may provide useful information in lev3 while introducing noise or redundancy in lev2. The results justify further investigation, not immediate removal or reweighting.
+
+What does the above_half column add?
+
+The full score exceeds an AUC of 0.50 for seven of eight companies in both variants. Without leverage, this falls to five of eight.
+
+That is consistent with the conclusion that leverage contributes materially to performance.
+
+However, being above 0.50 is a very low threshold. A company with AUC 0.51 and one with AUC 0.80 both count as above_half. I would report the individual company AUCs, the median and range, and ideally uncertainty intervals alongside this count.
+
+Conclusion for Part 4: Leverage has the strongest and most consistent contribution. Gross margin and inventory gap have variant-dependent effects, so the evidence does not support removing or reweighting them solely on these results.
+
+5. Putting all four parts together
+
+Early-warning potential
+
+The observations span median lead times from approximately 4.5 to 25.5 months. Predictive ability at each horizon still needs to be established.
+
+Robustness to individual companies
+
+Leave-one-company-out AUCs remain between 0.662 and 0.720 for lev2, and between 0.683 and 0.733 for lev3. No single exclusion causes a collapse to chance-level discrimination.
+
+Control-group sensitivity
+
+Healthy-only controls yield AUCs above 0.81, compared with approximately 0.68–0.70 in the baseline. The score appears more effective at separating failure from health than at separating failure from a mixed group that includes under-pressure companies.
+
+Signal contribution
+
+Leverage is the strongest contributor in the ablation tests. The evidence for gross margin and inventory gap is mixed across variants.
+
+6. What I would do next as a data analyst
+
+Before making claims about the score's predictive usefulness, I would prioritize these checks:
+
+1. Evaluate performance by forecast horizon. Calculate AUC for observations approximately 3–6, 6–12, 12–18, and 18–27 months before distress. This will show whether the score retains discrimination as the warning horizon lengthens.
+
+2. Inspect the individual company results. With only eight failed companies, average AUC can hide substantial differences between cases. Report each company's AUC and assess how uncertainty affects the comparisons.
+
+3. Compare control groups consistently. Run separate comparisons against healthy-only and under-pressure controls using the same time windows, scoring rules, and validation procedure. This is necessary to test whether the proposed failed > under-pressure > healthy ordering holds.
+
+4. Check for data leakage and selection bias. Ensure financial observations use only information that would actually have been available at the prediction date. Also check that the healthy controls were not selected in a way that makes them unusually easy to distinguish from failed companies.
+
+5. Test whether the AUC differences are reliable. Use an appropriate bootstrap or other uncertainty analysis, accounting for repeated observations from the same company. With only eight failed companies, ordinary row-level resampling may overstate confidence.
+
+6. Keep the existing score fixed during validation. Since Part 4 is diagnostic, do not reweight signals based on these same results and then report the improved AUC as independent evidence. Any revised score should be evaluated on held-out data or in a separate validation period.
+
+One further technical check: confirm how mean_auc is calculated. If it is the mean of eight company-specific AUCs, it should be interpreted as an average across company-level evaluations, not necessarily the same as a pooled AUC over all observations.
+
+7. Suggested report-ready findings
+
+Findings from the Distress Score Evaluation
+
+The analysis provides preliminary evidence that the financial distress score captures useful discriminatory information, with leverage emerging as its strongest individual contributor.
+
+Warning horizon: The median interval between quarter-end and distress ranges from 4.5 months for QTD 1 to 25.5 months for QTD 8. This indicates that the dataset includes observations more than two years before distress, although predictive performance at each horizon must be assessed separately.
+
+Robustness: Leave-one-company-out testing produces mean AUC values between 0.662 and 0.720 for lev2 and between 0.683 and 0.733 for lev3. No individual company exclusion reduces performance to chance level. Lev3 also achieves a higher mean AUC than lev2 in every reported exclusion scenario.
+
+Control-group sensitivity: Using healthy-only controls increases mean AUC to 0.811 for lev2 and 0.815 for lev3, compared with 0.683 and 0.704, respectively, under the baseline mixed-control design. This suggests that the score distinguishes failed companies from healthy companies more effectively than it distinguishes them from a more heterogeneous comparison group.
+
+Signal contribution: Removing leverage reduces mean AUC to 0.608 for both variants, indicating that leverage contributes substantially to discrimination. Removing gross margin or inventory gap produces mixed results across the two variants, so these indicators cannot yet be classified as consistently useful or redundant.
+
+Overall assessment: The findings are encouraging but preliminary. The score demonstrates moderate discrimination under the baseline design, stronger discrimination against healthy-only controls, and sensitivity to the choice of financial indicators. Further horizon-specific validation, company-level uncertainty analysis, and consistent comparisons against under-pressure controls are needed before concluding that the score provides a reliable early-warning system for corporate distress.
+
+My overall assessment: The strongest finding is not simply that lev3 has a higher AUC. It is that the score's performance changes substantially with the difficulty of the comparison group, while leverage consistently carries much of its discriminatory power. Those two observations should guide your next stage of analysis.
+
+What the Step 15 output shows
+
+1. The score works from about 4 to 15 months before distress.
+
+-   The last 4 quarters sit 3.6 to 14.8 months before distress, with medians of 4.5, 7.5, 10.6 and 13.6 months.
+
+-   Quarters 5–8 sit 15.6 to 26.8 months before.
+
+-   So the score ranks failed companies as riskier at roughly 4 to 15 months out, and there is no reliable signal beyond about 16 months. My earlier estimate was right.
+
+2. No single company carries the result.
+
+-   Leaving out any one failed company keeps the mean AUC between 0.661 and 0.720 with lev2, and between 0.683 and 0.733 with lev3. The largest swing is about 0.04.
+
+-   EXPR, BBBY and CONN hold it up. Dropping any of them lowers the lev2 figure to about 0.66.
+
+-   RAD and JOAN pull it down. Dropping RAD lifts it to 0.72 (lev2) and 0.73 (lev3). Dropping JOAN lifts it to 0.70 and 0.73.
+
+3. The score separates failed from healthy much better than failed from pressured.
+
+-   Against healthy companies only, AUC is 0.811 (lev2) and 0.815 (lev3), 8 of 8 above 0.5 in both. Against healthy plus under-pressure it is 0.683 and 0.704 (7/8).
+
+-   If the baseline mixes two control groups and one of them gives 0.81, the other must be much lower. My rough arithmetic puts failed against under-pressure alone at about 0.57 to 0.60. That is inferred, not measured. Step 16 measures it.
+
+-   Together with the Step 14 sanity check (under-pressure against healthy: 0.62 with lev2, 0.54 with lev3), the ordering is healthy < under-pressure < failed. The sets of quarters differ slightly between the two checks, so that ordering is approximate.
+
+-   Dropping DBI changes nothing (0.688, 0.701). Dropping BGFV lifts lev2 to 0.729 and lowers lev3 slightly to 0.688. BGFV scored 0.92 under lev2 in Step 14, so as a control it pulls the baseline down. It drops out of the lev3 score entirely. My guess is that its debt was zero a year earlier, but I haven’t checked. Choice of control group moves the number by about ±0.05.
+
+4. Leverage carries the score, and gross margin and inventory add little.
+
+-   Removing leverage drops the AUC from 0.683 (lev2) or 0.704 (lev3) to 0.608, with 5 of 8 above 0.5. Margin and inventory alone are therefore close to indistinguishable from chance with 8 companies.
+
+-   Removing gross margin or inventory changes the AUC by 0.03 or less, and the direction is inconsistent. With lev2, removing either raises it (0.694, 0.710). With lev3, removing either lowers it (0.681, 0.684). That is noise, not evidence about those signals.
+
+-   This ablation is diagnostic only. The equal weights stay.
+
+Where the hypotheses stand:
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Hypothesis   Status
+  ------------ --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  H1           Suggestive for leverage. Weak for gross margin.
+
+  H2           Not supported.
+
+  H3           Partially supported (about 0.7, or 0.81 against healthy only, at 4–15 months; robust to the checks run). It rests on leverage, is weak against pressured companies, fades beyond about 16 months, and is in-sample. 7 of 8 gives p = 0.07.
+
+  H4           Not supported.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+A concern the checks haven’t covered: the debt definitions
+
+Leverage carries the score, so I read debt_definition.csv to see how solid the debt figures are. This is my copy, dated Oct 11, and its BIG row still has the formula from before the fix. It shows uneven treatment:
+
+  -------------------------------------------------------------------------------------------------------
+  Issue                                        Companies                           Failed ones affected
+  -------------------------------------------- ----------------------------------- ----------------------
+  Debt includes finance leases (Y or partly)   TGT, HD, M, WOOF, RAD, PRTY, CONN   RAD, PRTY, CONN
+
+  Low-confidence definition                    KSS, WOOF, PLCE, BBBY, PRTY, TUEM   BBBY, PRTY, TUEM
+  -------------------------------------------------------------------------------------------------------
+
+Together these cover 5 of the 8 failed companies. Only BIG, EXPR and JOAN avoid both, and of those only JOAN is rated high confidence (BIG and EXPR are medium).
+
+A year-on-year change removes most of a constant definition difference, so this is not necessarily a problem. Three things can still cause one:
+
+-   lev3: percent growth is diluted when a constant lease balance sits in the base.
+
+-   Tag switches: a company changing tags mid-series can create a false jump. The notes flag WOOF in Jan 2026, PRTY’s older quarters and BIG’s and EXPR’s “first available” alternates.
+
+-   BBBY: its note says our formula gave 1,672m against 1,030m on the gross tag in Feb 2023. That quarter is after distress and excluded, so I don’t know whether the same gap exists in 2022. BBBY is one of the strongest leverage signals.
+
+How mean_auc was calculated
+
+You guessed right. In Steps 14 to 16, each failed observation (one company-quarter) got an AUC equal to the share of control observations, in the same calendar quarter, with a lower score. Ties count as half. A company’s figure is the average of its quarters in the window, and mean_auc is the plain average of the eight company figures. It is not a pooled AUC over all observations.
+
+-   The two differ when companies have unequal numbers of scored quarters. BBBY, PRTY and TUEM had fewer than the others. The new script prints both versions side by side.
+
+-   The comparison is stratified by calendar quarter. An observation is never compared with a control from a different quarter.
+
+Three weaknesses in my earlier work that your list exposed:
+
+-   The earlier intervals resampled only the failed companies and held the controls fixed, so they were too narrow. My statement that the intervals excluded 0.5 is provisional until the two-way version is run.
+
+-   The Step 15 control-group comparison rebuilt the percentiles against a different reference set each time. That changed the score itself, so it was not a consistent comparison.
+
+-   Choosing lev3 and window B happened after I’d seen results, so even the “fixed” score is not pre-registered. Only the equal weights were fixed in advance.
+
+How the new step covers your points
+
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Your point                 What the script does
+  -------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1. Horizon                 Bins at 3–6, 6–12, 12–18 and 18–27 months before distress, by months from quarter end. The 3–6 bin has exactly one quarter per company (a single percentile each). Variants B and C are both shown.
+
+  2. Company level           A company-by-horizon table with the number of scored quarters in each cell. Per company, it gives a 95% interval that resamples the control companies, plus the min and max of its single-quarter AUCs. With 1–3 quarters per cell, treat the cell values as noisy.
+
+  3. Consistent controls     The score is built once and never changes. Only the comparison set varies: failed vs healthy, failed vs under-pressure, and under-pressure vs healthy, all in the same calendar quarters. A paired “healthy gap” per failed company tests the ordering directly.
+
+  4. Leakage and selection   See below.
+
+  5. Uncertainty             A two-way cluster bootstrap resamples failed companies and control companies, keeping a company’s quarters together. It also reports the Wilcoxon signed-rank p-value on the company AUCs, which uses magnitudes, unlike the sign test.
+
+  6. Score fixed             No reweighting, and the Part 4 ablation is not repeated.
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Checks on leakage and selection (point 4)
+
+What the pipeline already guarantees. Each observation uses values first filed on or before its as-of date, and the manual debt fixes carry their filing dates. The fixed score uses raw signals ranked against controls, so the peer-median adjustments aren’t involved. The one known exception is DBI gross profit (latest-filed, new basis). DBI is a control, and dropping it moved the AUC by 0.005 or less (Step 15: 0.683 to 0.688 with lev2, 0.704 to 0.701 with lev3).
+
+What the script tests:
+
+-   4a: that no failed observation was first public after its distress date. The expected count is 0.
+
+-   4b: days from quarter end until the inputs were public. The lead time “from quarter end” overstates the real lead by about this much. The script prints months from public availability alongside.
+
+-   4c: a strict real-time version. Same-quarter percentiles use other companies’ data, which may not have been public on the failed company’s filing date. This version keeps only controls already public, with scores recomputed, and shows what share of controls that excludes. It skips any observation with fewer than six eligible controls.
+
+-   4d and 4e: the selection check below.
+
+The selection risk I’m most concerned about. The healthy controls are WMT, COST, TGT, HD, TJX and ROST, and I expect them to be much larger than the failed companies (BBBY, BIG, CONN, EXPR, JOAN, PRTY, RAD, TUEM). That is my expectation, not something I’ve checked in your data. If so, the healthy comparison could reflect company size and business model, not financial signals. Check 4d tests this directly:
+
+-   It shows median four-quarter sales by group.
+
+-   It scores failed observations on company size alone and computes the AUC against healthy and under-pressure controls. If size alone separates failed from healthy about as well as the score does, the 0.81 is not evidence about the signals, and the under-pressure comparison is the credible one.
+
+-   Check 4e computes the AUC against each control company separately, showing whether a few controls make it look easy.
+
+A circularity I can’t test in code. The “under pressure” group was assigned by judgement at project design. If that judgement used weak margins or high debt, the ordering check against that group is partly circular.
+
+What can’t be solved by checks
+
+The score has been refined on these same eight companies, and the controls’ selection is partly mine. Reweighting and reporting the new AUC would not be independent evidence. For that you need held-out data, in one of two forms:
+
+-   Other failed retailers not used in design. I could search for a verified list and run the existing pipeline on them. Several 2020 and 2021 failures fall inside the COVID window we blank, so the list would have to be built with care.
+
+-   A forward test: freeze the score and apply it to the companies still trading (KSS, M, WOOF, DBI, PLCE) as of their latest quarter.
+
+Either way, the score must be frozen before it touches the new data. I’ll set up the held-out test after this step if you want it.
+
+STEP 16(VALIDATION)
+
+CHATGPT RESPONSE
+
+Insights from your corporate distress prediction analysis
+
+The most important takeaway is that your score appears to distinguish failed companies from other companies most effectively around 3–12 months before distress, particularly when using lev3. Its performance weakens at longer horizons, and the choice of comparison companies substantially affects the results. Your real-time and selection-bias checks also reveal important limitations that should shape the final conclusions.
+
+I would interpret the results in four layers: predictive performance over time, differences between failed companies, the distinction between healthy and under-pressure companies, and whether the results would hold up in a realistic prediction setting.
+
+1. Part 1 — How early can the score identify distress?
+
+The first table measures AUC across four time windows. An AUC of 0.50 represents chance-level discrimination; higher values indicate better discrimination.
+
+AUC by months before distress
+
+Company-mean AUC under variant B, with the 2020Q2–2021Q4 period blanked.
+
+[Chart]
+
+■ lev2
+
+■ lev3
+
+Key findings
+
+-   3–6 months: lev2 achieves a company-mean AUC of 0.702, while lev3 achieves 0.743.
+
+-   6–12 months: performance remains similar: 0.704 for lev2 and 0.732 for lev3.
+
+-   12–18 months: both weaken to approximately 0.64.
+
+-   18–27 months: lev2 falls to 0.507 and lev3 to 0.590 in the blanked-period analysis.
+
+The first two windows provide the strongest evidence of useful discrimination. lev3 is ahead of lev2 by 0.041 in the 3–6 month window and 0.028 in the 6–12 month window.
+
+The Wilcoxon p-values in those windows are also below 0.05 for both variants. However, these tests involve only eight failed companies, and the confidence intervals are wide. The results should therefore be described as encouraging preliminary evidence rather than definitive proof.
+
+Why the longer horizon matters
+
+In the blanked-period results, only four failed companies contribute to the lev2 18–27 month window, and five contribute to lev3. Their company-mean AUCs are 0.507 and 0.590, respectively.
+
+That means the current results do not support a strong claim that the score reliably provides a two-year warning.
+
+The unblanked analysis tells a similar story overall: the 18–27 month company-mean AUC is 0.551 for lev2 and 0.589 for lev3. The longer-horizon signal remains weak, even when more observations are included.
+
+Business implication: position the score primarily as a potential short- to medium-term warning indicator, not yet as a reliable two-year forecasting tool.
+
+2. Part 2 — Which failed companies does the score identify well?
+
+This section is particularly valuable because an overall AUC can conceal very different results for individual companies.
+
+Company-level results across 3–27 months
+
+The per-company uncertainty table gives the following overall AUCs:
+
+  --------------------------------------------------------------------------------
+  Failed company   lev2 AUC   lev3 AUC   Interpretation
+  ---------------- ---------- ---------- -----------------------------------------
+  BBBY (old)       0.83       0.80       Strong discrimination, but few quarters
+
+  BIG              0.72       0.73       Moderate discrimination
+
+  CONN             0.78       0.75       Relatively strong discrimination
+
+  EXPR             0.60       0.64       Modest discrimination
+
+  JOAN             0.55       0.63       Weak to modest discrimination
+
+  PRTY             0.62       0.74       Better performance with lev3
+
+  RAD              0.39       0.46       Poor discrimination
+
+  TUEM             0.74       0.77       Relatively strong discrimination
+  --------------------------------------------------------------------------------
+
+These values suggest that the model does not work equally well for all failed companies.
+
+Three important patterns
+
+Consistent stronger cases: CONN, BIG and TUEM
+
+These companies have overall AUCs above 0.70 under both variants, suggesting the score often ranks them as riskier than the comparison companies.
+
+A meaningful variant difference for PRTY
+
+lev3 achieves 0.74 compared with 0.62 for lev2. This is worth investigating, but the four-quarter sample is too small to establish a stable company-specific advantage.
+
+RAD is a clear weakness
+
+AUC is 0.39 for lev2 and 0.46 for lev3. The score ranks RAD below controls more often than expected from a useful distress discriminator, especially under lev2.
+
+Why RAD matters
+
+RAD's result is important because it shows that a model can perform reasonably well on average while failing on a particular distressed company.
+
+Possible explanations include:
+
+-   RAD's financial deterioration may follow a different pattern from the other failed companies.
+
+-   The score may not capture the particular risks that preceded RAD's distress.
+
+-   The small number of quarters may make its AUC unusually sensitive to individual observations and control selection.
+
+These are hypotheses to investigate, not conclusions the table proves.
+
+Why EXPR also deserves attention
+
+EXPR's company-level AUC is 0.60 for lev2 and 0.64 for lev3, but its quarter-level results vary widely. For example, its lev2 AUC is 1.00 in the 3–6 month window and 0.20 in the 18–27 month window.
+
+This indicates that the model's performance for EXPR changes considerably with the time horizon. It may be detecting distress-related signals close to failure without identifying them reliably much earlier.
+
+An important statistical limitation
+
+Most company-by-horizon cells contain only one or two scored quarters. An AUC calculated from such small samples can change sharply when a single observation changes.
+
+Therefore, the company-level table is most useful for identifying cases that deserve investigation. It is not sufficient to conclude that the model reliably predicts distress for any particular company.
+
+Also, the confidence intervals in the company-level uncertainty table resample control companies while holding the failed company's quarters fixed. They capture uncertainty from control selection, but not the full uncertainty associated with observing different quarters or different failed companies.
+
+Conclusion for Part 2: The model's effectiveness is heterogeneous. CONN, BIG and TUEM are promising cases; RAD is a clear warning sign; and EXPR highlights the need to examine how performance changes with the forecast horizon.
+
+3. Part 3 — Can the score distinguish failed companies from under-pressure companies?
+
+This is a more demanding and commercially meaningful test than distinguishing failed companies from healthy ones.
+
+A healthy retailer may have very different financial characteristics from a distressed retailer. An under-pressure retailer, however, may share many of the same characteristics as a company approaching failure.
+
+Your table compares the same score and the same quarters against three groups:
+
+-   failed_vs_healthy
+
+-   failed_vs_UP, where UP means under-pressure
+
+-   UP_vs_healthy
+
+The proposed ordering is:
+
+\[ \text{Failed} > \text{Under-pressure} > \text{Healthy} \]
+
+To support that ordering, all three comparisons need to discriminate in the expected direction, and the difference between the failed-versus-healthy and failed-versus-under-pressure AUCs needs to be sufficiently clear.
+
+The strongest evidence is in the 3–6 month window
+
+  -----------------------------------------------------------------------
+  Comparison                               lev2 AUC       lev3 AUC
+  ---------------------------------------- -------------- ---------------
+  Failed vs healthy                        0.902          0.902
+
+  Failed vs under-pressure                 0.471          0.450
+
+  Under-pressure vs healthy                0.855          0.751
+  -----------------------------------------------------------------------
+
+The score separates failed companies from healthy companies very well in this window. It also separates under-pressure companies from healthy companies reasonably well.
+
+However, the failed-versus-under-pressure AUC is below 0.50 for both variants.
+
+That is a critical finding: the score appears to distinguish financial weakness from financial health much better than it distinguishes companies that ultimately fail from those that are under pressure but do not fall into the failed group.
+
+For lev3, the healthy gap is 0.467, compared with 0.431 for lev2. The reported confidence interval for the lev3 gap is 0.11–0.83, which is above zero. That supports a difference between the two discrimination tasks in this window, although the underlying sample remains small.
+
+What happens at longer horizons?
+
+At 6–12 months, failed-versus-healthy AUC remains high at 0.854 for lev2 and 0.860 for lev3. Yet failed-versus-under-pressure discrimination is weaker: 0.538 and 0.650.
+
+At 12–18 months, the results weaken further. By 18–27 months, the AUCs are close to 0.50 for several comparisons, and the uncertainty intervals are extremely wide.
+
+The longer-horizon results do not establish the full proposed ordering.
+
+What this means for the project
+
+The score may be more suitable as a broad financial-risk indicator than as a standalone failure classifier.
+
+It could help identify companies that are financially different from healthy peers, but further work is needed to determine whether it can reliably identify which under-pressure companies will progress to failure.
+
+Conclusion for Part 3: The full ordering of failed, under-pressure and healthy companies is not established. The strongest evidence is for distinguishing failed companies from healthy companies, especially 3–12 months before distress. The more difficult failed-versus-under-pressure comparison remains a major limitation.
+
+4. Part 4 — Leakage, real-time feasibility and selection bias
+
+This is arguably the most important part of the entire analysis because it asks whether the model could work in practice, using information available at the time a decision would be made.
+
+4.1 Data leakage: encouraging result
+
+Your check finds that 0 of 64 failed observations use inputs that first became public after the distress date.
+
+That is good. It suggests that the tested failed-company observations do not contain the specific form of future-information leakage checked by this test.
+
+However, this does not eliminate every possible source of leakage or bias. You still need to confirm that the same timing rules are applied to all controls and that the data definitions themselves do not encode information about future outcomes.
+
+4.2 The score is not available at quarter-end
+
+The median time between quarter-end and publication of all required inputs is:
+
+  -----------------------------------------------------------------------
+  Company group                Median reporting delay
+  ---------------------------- ------------------------------------------
+  Failed                       39 days
+
+  Healthy                      33 days
+
+  Under-pressure               39 days
+  -----------------------------------------------------------------------
+
+This means a score based on those inputs generally cannot be calculated immediately at quarter-end.
+
+The actual lead time is therefore shorter than the quarter-end-based horizon suggests.
+
+For example, your median lead time for the 3–6 month group falls to approximately 3.0 months after the inputs become public.
+
+That is still potentially useful, but it changes how you should describe the model: it is a warning based on publicly available financial information, not necessarily a warning available at quarter-end.
+
+4.3 The strict real-time results are mixed
+
+Your real-time comparison restricts controls to those whose inputs were already public at the relevant prediction date.
+
+For lev2, the results are:
+
+  ------------------------------------------------------------------------
+  Horizon                Fixed-score AUC           Real-time AUC
+  ---------------------- ------------------------- -----------------------
+  3–6 months             0.702                     0.694
+
+  6–12 months            0.704                     0.643
+
+  12–18 months           0.643                     0.698
+
+  18–27 months           0.507                     0.395
+  ------------------------------------------------------------------------
+
+The results are not uniformly worse under real-time restrictions. The 12–18 month AUC actually increases.
+
+That does not necessarily mean real-time evaluation improves the model. The eligible controls and number of represented failed companies change between evaluations.
+
+In particular, only five companies contribute in the 3–6 month window, seven in the 6–12 month window, six in the 12–18 month window and four in the 18–27 month window.
+
+The 18–27 month result of 0.395 is concerning, but it is based on just four companies. It is not sufficient to conclude that the score systematically reverses its predictions at that horizon.
+
+Important analytical check: before interpreting the real-time AUC differences as changes in model quality, verify that each comparison uses the same failed-company observations and a clearly documented eligible control set. Where the failed companies differ, the difference combines changes in evaluation population with changes in performance.
+
+4.4 Company size may be a major source of selection bias
+
+This is one of the most striking results in the output.
+
+The median four-quarter sales figures are:
+
+  -----------------------------------------------------------------------
+  Group                               Median sales
+  ----------------------------------- -----------------------------------
+  Failed                              2,182 million
+
+  Under-pressure                      3,378 million
+
+  Healthy                             128,486 million
+  -----------------------------------------------------------------------
+
+The healthy controls are dramatically larger than the failed companies.
+
+Your size-only diagnostic shows:
+
+-   Size alone versus healthy companies: AUC 0.978
+
+-   Size alone versus under-pressure companies: AUC 0.596
+
+-   Size alone versus both groups: AUC 0.787
+
+A model that uses only company size achieves almost perfect discrimination between failed and healthy companies in this sample.
+
+That is a serious warning. It suggests the strong failed-versus-healthy AUC may partly reflect differences in company size rather than distress-specific financial signals.
+
+For example, if failed retailers are generally smaller than the selected healthy retailers, a score that ranks smaller companies as riskier could appear highly effective even if it does not identify the financial deterioration that precedes failure.
+
+This does not prove that your score is merely measuring size. It shows that size is a powerful alternative explanation that must be tested before the score's performance can be attributed to distress signals.
+
+I would next compare failed companies with healthy retailers of similar size, and ideally similar business models and reporting periods. You could also test whether the score retains discrimination after controlling for size.
+
+4.5 Performance varies sharply by control company
+
+Your final table makes the selection problem even clearer.
+
+  ------------------------------------------------------------------------
+  Control company                  Group                         AUC
+  -------------------------------- ----------------------------- ---------
+  TJX                              Healthy                       0.92
+
+  COST                             Healthy                       0.84
+
+  TGT                              Healthy                       0.84
+
+  WOOF                             Under-pressure                0.80
+
+  DBI                              Under-pressure                0.71
+
+  KSS                              Under-pressure                0.56
+
+  BGFV                             Under-pressure                0.28
+
+  PLCE                             Under-pressure                0.28
+  ------------------------------------------------------------------------
+
+These results show that the score does not perform equally well against every control.
+
+It distinguishes the failed observations from some healthy retailers very effectively, while its performance against several under-pressure retailers is much weaker. For BGFV and PLCE, the AUC of 0.28 indicates discrimination in the opposite direction from what you would want.
+
+This reinforces the Part 3 finding: some under-pressure companies resemble failed companies closely enough that the score struggles to distinguish them.
+
+The table also raises a question about whether the model is capturing financial distress, differences in company characteristics, or a mixture of both.
+
+5. A technical issue to resolve before reporting the results
+
+There is one inconsistency worth checking.
+
+In Part 1, the 12–18 month lev2 results under the blanked-period analysis have 12 observations and a pooled AUC of 0.638, while the company-mean AUC is 0.643.
+
+In the unblanked results, there are 13 observations, a pooled AUC of 0.666, and the same company-mean AUC of 0.643.
+
+The identical company-mean AUC despite a changed sample may be perfectly legitimate, but it warrants verification. The additional observation may change the pooled AUC without changing the average of company-level AUCs.
+
+More importantly, make sure that all tables consistently distinguish between:
+
+-   Pooled AUC: calculated across the scored observations.
+
+-   Company-mean AUC: the average of the company-specific results.
+
+They answer related but different questions. With unequal numbers of quarters per company, the pooled result may give greater weight to companies contributing more observations.
+
+Also, your confidence intervals are wide. For example, the blanked-period lev3 3–6 month interval runs from 0.53 to 0.91. This indicates substantial uncertainty about the true level of discrimination, despite the point estimate being 0.743.
+
+6. Overall assessment
+
+What the results support
+
+-   Promising discrimination in the 3–12 month windows, particularly for lev3.
+
+-   No evidence of the specific post-distress-publication leakage tested in the 64 failed observations.
+
+-   Some failed companies are consistently easier to distinguish from controls than others.
+
+What remains uncertain
+
+-   Reliable predictive performance beyond 12–18 months.
+
+-   Whether the score can distinguish eventual failures from under-pressure companies.
+
+-   Whether company size and control selection inflate the apparent AUC.
+
+-   Whether real-time performance generalizes beyond the small number of companies evaluated.
+
+7. What I would prioritize next
+
+My recommended order is:
+
+1.  Match healthy controls by company size. This directly tests whether the strong healthy-only AUC is driven partly by size differences.
+
+2.  Focus on the under-pressure comparison. Investigate why BGFV and PLCE have reverse-direction AUCs and why the score struggles with other under-pressure companies.
+
+3.  Validate the real-time evaluation design. Confirm the exact prediction dates, eligible controls, and failed-company samples used in every horizon.
+
+4.  Report uncertainty and company-level variation. Avoid treating small-sample AUC estimates as precise measures of performance.
+
+5.  Keep the longer-horizon claims conservative. The current evidence does not establish a dependable two-year warning system.
+
+8. Report-ready conclusion
+
+Summary of Findings: Corporate Distress Score
+
+The analysis provides preliminary evidence that the distress score can discriminate between failed companies and comparison companies, particularly within 3–12 months of distress. Under the blanked-period analysis, lev3 achieves company-mean AUCs of 0.743 and 0.732 in the 3–6 and 6–12 month windows, respectively. Performance weakens at longer horizons, and the results do not establish a reliable two-year warning capability.
+
+Company-level results reveal considerable heterogeneity. CONN, BIG and TUEM show relatively strong discrimination under both variants, whereas RAD performs poorly. The small number of observations per company and horizon limits the reliability of these individual estimates.
+
+The control-group analysis indicates that failed companies are easier to distinguish from healthy companies than from under-pressure companies. This suggests that the score may identify broad financial differences more effectively than it identifies which financially challenged companies will ultimately fail.
+
+The leakage check is encouraging: none of the 64 failed observations uses inputs first published after the distress date. However, publication delays shorten the effective warning horizon, and the strict real-time results remain uncertain because the eligible control sets and represented failed companies vary by horizon.
+
+A further concern is company-size selection bias. A size-only diagnostic achieves an AUC of 0.978 against healthy controls, suggesting that the strong healthy-only results may partly reflect differences in company size. Size-matched controls and further validation against under-pressure companies are therefore important next steps.
+
+Overall, the score is a promising exploratory distress indicator, especially at shorter horizons, but its predictive value and real-time generalizability remain unproven. Further testing should prioritize control-group comparability, company-size effects, uncertainty estimation, and performance against under-pressure companies before the score is presented as a validated early-warning model.
+
+My bottom line: your most defensible claim today is that the score shows promising short-term discrimination, particularly with lev3, but the apparent performance is sensitive to which companies serve as controls. The next major test is whether that signal survives size-matched comparisons and a strict, reproducible real-time evaluation.
+
+Step 15
+
+The score separates failed retailers from large healthy retailers. It doesn't separate them from stressed retailers, and company size alone does at least as well against the healthy group. So H3 should be downgraded.
+
+What the output shows
+
+1. Horizon (Part 1). The score holds up to about 12 months before distress and then fades.
+
+  ----------------------------------------------------------------------------------------
+  Months before distress   lev2 AUC (95% CI)               lev3 AUC (95% CI)
+  ------------------------ ------------------------------- -------------------------------
+  3–6                      0.70 (0.47–0.89)                0.74 (0.53–0.91)
+
+  6–12                     0.70 (0.51–0.89)                0.73 (0.54–0.89)
+
+  12–18                    0.64 (0.40–0.85)                0.64 (0.45–0.84)
+
+  18–27                    0.51 (0.19–0.80), 4 companies   0.59 (0.32–0.84), 5 companies
+  ----------------------------------------------------------------------------------------
+
+-   Only the 6–12 bin (both leverage measures) and the lev3 3–6 bin have intervals clearing 0.5, and only just. The lev2 3–6 interval includes 0.5, even though its Wilcoxon p is 0.047. The Wilcoxon test ignores uncertainty in the controls, so I'm trusting the interval.
+
+-   My earlier "4 to 15 months" claim was too generous. The supportable range is about 3 to 12 months from quarter end.
+
+-   Measured from when the inputs were public, the median lead is about 3 months in the first bin and 8 months in the second.
+
+-   Pooled and company-mean AUCs are nearly identical. The mean_auc question is settled and doesn't change anything.
+
+2. Companies (Part 2). The result is carried by some cases, not all eight.
+
+-   BBBY (0.83 / 0.80), CONN (0.78 / 0.75) and TUEM (0.74 / 0.77) are consistently good, where the two numbers are lev2 and lev3.
+
+-   RAD is at or below chance (0.39 / 0.46). Its interval for lev2, 0.25–0.53, sits below 0.5.
+
+-   JOAN is near chance on lev2 (0.55, interval 0.31–0.78).
+
+-   EXPR goes from 1.00 at 3–6 months to 0.20 at 18–27. PRTY drops to 0.20 at 12–18.
+
+-   Single-quarter ranges are wide (EXPR 0.20 to 1.00). Cells with one or two quarters are anecdotes.
+
+3. Ordering failed > under-pressure > healthy (Part 3). This is only half supported.
+
+-   Under-pressure scores above healthy: 0.86 / 0.76 (lev2) and 0.75 / 0.64 (lev3) at 3–6 / 6–12 months.
+
+-   Failed vs under-pressure is about chance: 0.47 and 0.54 (lev2), 0.45 and 0.65 (lev3). The intervals run from near 0 to about 0.8.
+
+-   The healthy gap interval sits clearly above 0 only for lev3 at 3–6 months, and that rests on 4 companies. The lev3 rows are thin because under-pressure controls often lack a valid lev3 value (my guess; not checked).
+
+-   So the score ranks failed and stressed retailers together, above healthy ones. It does not rank failed above stressed.
+
+4. Leakage and selection (Part 4).
+
+-   4a: no failed observation was first public after its distress date (0 of 64).
+
+-   4c: the strict real-time version gives similar numbers (0.69, 0.64, 0.70, 0.40 against 0.70, 0.70, 0.64, 0.51). It covers only 4–7 companies per bin, because 40–45% of controls weren't public yet and some failed observations were dropped. I can't call it a clean confirmation. It also shows my same-quarter ranking leans on controls that hadn't filed yet, a mild look-ahead in the reference group.
+
+-   4d (the important one):
+
+    -   Median four-quarter sales are about 2.2bn for failed, 3.4bn for under-pressure and 128bn for healthy, so the healthy controls are roughly 59 times larger.
+
+    -   A score that is company size and nothing else gets 0.98 against healthy (CI 0.88–1.00), better than the real score's 0.85–0.90. The healthy comparison therefore says almost nothing about the financial signals.
+
+    -   Size alone gets 0.79 against both control groups combined (CI 0.57–0.97, failed observations 3–18 months out). The score's bin AUCs against the same combined controls are 0.64–0.74. The windows and observations aren't identical, so this isn't a clean head-to-head. Still, there's no evidence the score beats size.
+
+    -   Against under-pressure only, where size is roughly matched, size gets 0.60 and the score is at chance too.
+
+-   4e: AUC against each control ranges from 0.92 (TJX) to 0.28 for both BGFV and PLCE. The score rates BGFV and PLCE as riskier than the failed companies. The overall figure averages easy healthy comparisons with near-impossible stressed ones.
+
+What I'm changing in my conclusions
+
+-   H3: partially supported becomes "the score identifies weak balance sheets relative to large healthy retailers, within about 12 months. It does not separate failed from stressed retailers, and it has not been shown to add information beyond size."
+
+-   H1: leverage still moves in the right direction in most failed companies, but that is a within-company trend. It doesn't validate the score as a failure predictor.
+
+-   Ordering and 0.81: the 0.81 healthy-only AUC from Step 15 shouldn't be reported as evidence of predictive skill.
+
+-   The 0.68–0.72 combined AUC: report it only alongside the size-only 0.79.
+
+-   Under-pressure circularity: I haven't been able to rule out circularity in the under-pressure group's labels from the data. The fact that BGFV and PLCE out-score the failed companies suggests the labels may reflect real stress.
+
+Some earlier caveats still stand. The window and leverage choices were made in-sample, the AUCs are optimistic, and the failed sample is only eight.
+
+Recommended next step (before the debt-definition sensitivity)
+
+The only fair comparison in this sample is failed vs under-pressure, and it is at chance. Two things would change that.
+
+1.  Add size-matched healthy controls. These would be mid-size retailers that didn't fail. Candidates to verify, not yet checked in EDGAR: Burlington, Ollie's, Five Below, Dillard's, Academy, Big 5, Haverty's. Running them through the existing pipeline lets us test whether the score beats size when size is held roughly constant.
+
+2.  Freeze the score and test it on new failed retailers not used in design. This needs a verified list and the same distress-date rules. Without it, nothing here is independent evidence.
+
+If you'd rather not extend the sample, the honest deliverable is the score presented as a stress screen with these limits stated. The live scoring of KSS, M, WOOF, DBI and PLCE would fit that framing, and so would the Word documents, with the corrections above. Which direction do you want?
+
+Step 17
+
+Step 17 doesn't show that the score separates failed retailers from similar-sized or stressed retailers, and I have to retract part of my earlier horizon claim. Overall the output is mixed. The score's ranking against large healthy retailers is real but tells us little. The comparisons that matter, against size-matched and stressed retailers, are all inconclusive.
+
+1. Size matching (17A Parts 1–3)
+
+What I got wrong last turn.
+
+-   I called the under-pressure group "size-comparable" using its median. It actually spans 1.0bn (BGFV) to 24bn (M), and KSS and M are bigger than every failed company except RAD.
+
+-   Healthy controls overlap more than I expected: ROST (18.9bn) and TJX (50bn) fall within 10x of 26 of 40 failed observations. But only 5 observations have three or more healthy matches, so matching is thin.
+
+Result. Against size-matched controls the fixed score gives:
+
+  -----------------------------------------------------------------------------------------------------
+  Match within   Leverage   AUC (interval, failed companies only)      Size-only AUC on the same sets
+  -------------- ---------- ------------------------------------------ --------------------------------
+  10x            lev2       0.56 (0.46–0.65), 5/8 above 0.5            0.63
+
+  10x            lev3       0.59 (0.49–0.67), 6/7                      0.72
+
+  3x             lev2       0.43, 5 companies, 13 of 24 observations   0.40
+
+  3x             lev3       0.48, 4 companies, 10 of 24 observations   0.46
+  -----------------------------------------------------------------------------------------------------
+
+-   No interval clearly excludes 0.5. The intervals resample failed companies only, so they are too narrow.
+
+-   Matching at 10x didn't fully remove size. The size-only AUC is still 0.63–0.72, as large as the score's own edge. The 3x versions lose about half the observations.
+
+-   This is low power, not proof the score is useless: 4–8 companies, 3–5 matched controls per observation. It also gives no evidence that the score adds anything beyond size.
+
+2. The under-pressure companies (17A Parts 4–5)
+
+Where companies sit on the core score (lev2, median):
+
+-   Highest: BBBY 0.81, EXPR 0.80, PLCE 0.89, BGFV 0.75, CONN 0.73, PRTY 0.71, TUEM 0.69, BIG 0.67.
+
+-   In the middle: WOOF 0.56, KSS 0.55, DBI 0.48, M 0.48, JOAN 0.52, RAD 0.45.
+
+-   Lowest: healthy companies at 0.25–0.56.
+
+Why BGFV and PLCE reverse the comparison. They aren't noise. They look deteriorated on the signals.
+
+-   PLCE: gross margin fell 4–20 points and its leverage change sat at the 100th percentile from 2022Q2 to 2023Q3. Then 2024Q1 reversed sharply (score 0.03), so it looks like a stress episode followed by recovery.
+
+-   BGFV: driven by gross margin and inventory (inventory gap up to +52 points). Its leverage change is essentially zero, so its leverage percentile (0.4–1.0) is a ranking of very small differences, likely amplified by how tightly the peers cluster near zero. I haven't verified that.
+
+-   Against each under-pressure company: the core score is 0.28 against BGFV and 0.28 against PLCE, but 0.71–0.80 against M, DBI and WOOF, and 0.56 against KSS. It separates failed companies from the rest of the under-pressure group moderately well, within thin samples (DBI and WOOF have 17–20 comparisons).
+
+-   What this means: the comparison asks whether the score can tell a failed retailer from an equally stressed one that survived (so far, per one secondary source for PLCE). With this sample it can't.
+
+Signal by signal, failed vs under-pressure (AUC, two-way interval):
+
+  ------------------------------------------------------------------------------------
+  Signal                    All under-pressure   Without BGFV and PLCE (4 companies)
+  ------------------------- -------------------- -------------------------------------
+  Gross margin percentile   0.50 (0.26–0.81)     0.58
+
+  Inventory percentile      0.52 (0.31–0.73)     0.61
+
+  lev2 percentile           0.73 (0.51–0.92)     0.80 (0.63–0.97)
+
+  lev3 percentile           0.62 (0.41–0.79)     0.68 (0.51–0.83)
+
+  Core score lev2 / lev3    0.52 / 0.53          0.68 / 0.68 (0.37–0.88 / 0.43–0.87)
+  ------------------------------------------------------------------------------------
+
+Only the leverage-change signal separates failed from stressed, and barely. Gross margin and inventory add nothing there and dilute the combined score. This fits the Step 15 finding that leverage carries the score. I'm not reweighting. Choosing leverage-only now would be picking the winner on the same eight companies. It is a hypothesis to test on held-out data, and I'm recording it as that.
+
+3. Real-time design (17B Parts 1–4)
+
+The audit shows the strict real-time check I built is not a real-time test.
+
+-   Calendar alignment. The score compares each company with controls in the same calendar quarter. PRTY (December quarter ends), TUEM (also calendar quarter ends) and RAD's last two quarters are compared with controls whose quarters end a month later, which hadn't reported yet (n_public 0–2). So the strict version covers only 5–6 companies per bin. In the 3–6 bin those are BBBY, BIG, CONN, EXPR and JOAN. PRTY, RAD and TUEM drop out.
+
+-   Eligibility. DBI is never public in time, WOOF only 30%, TGT 42%, COST 50%.
+
+-   Late public dates. PRTY 2020-12-31 and RAD 2021-08 and 2021-11 first appeared as comparatives 10–14 months late. All four are unscored (COVID window), so no AUC is affected.
+
+-   The 18–27 bin is untestable. Only 10 of 24 observations are scored, from 4 companies. Other horizon bins have 12–16 scored observations.
+
+-   Strict AUC against the main method. 0.66–0.75 against 0.64–0.80, similar, with no sign that control timing inflates the main result. It rests on subsets, so I'm not calling it confirmation.
+
+-   A proper real-time version would score each company at its actual public date against every control's latest public quarter. That needs a different alignment from the one the score was built on, so I'd declare it as a separate variant before running it.
+
+4. Horizon claims retracted (17B Parts 2–3)
+
+Step 16's "holds to about 12 months, then fades" doesn't survive. Binning by the date the score was computable instead of quarter end:
+
+-   lev2: 0.65, 0.74, 0.66, 0.72, 0.61 for under 3, 3–6, 6–12, 12–18 and 18–27+ months.
+
+-   lev3: 0.71, 0.80, 0.69, 0.69, 0.64.
+
+All intervals span roughly 0.4 to 0.9. The bin differences are smaller than the uncertainty, and bin membership changes company composition. I can't show a longer lead time than the earlier numbers imply, or a decay.
+
+Evidence ledger (3–12 months, fixed score)
+
+  ---------------------------------------------------------------------------
+  Comparison                  lev2                    lev3
+  --------------------------- ----------------------- -----------------------
+  Failed vs all controls      0.70 (0.52–0.85), 8/8   0.74 (0.56–0.88), 7/8
+
+  vs healthy                  0.87 (0.71–0.97)        0.87 (0.72–0.97)
+
+  vs under-pressure           0.52 (0.16–0.75)        0.52 (0.20–0.87)
+
+  vs size-matched, 10x        0.56 (0.46–0.65)        0.59 (0.49–0.67)
+
+  Under-pressure vs healthy   0.78 (0.66–0.94)        0.67 (0.57–0.87)
+  ---------------------------------------------------------------------------
+
+Only the first, second and last rows have intervals that exclude 0.5. At 12–18 months no row does.
+
+Where this leaves the hypotheses
+
+-   H3: the score ranks failed and stressed retailers above large healthy ones. Failed above stressed is unproven, and the edge beyond size is unproven. I'd describe it as a stress screen.
+
+-   Ordering failed > under-pressure > healthy: half supported. Under-pressure above healthy holds, though size confounds it too, and I haven't tested that. Failed above under-pressure doesn't.
+
+-   Lead time: about 3–12 months at best. A longer lead, or a fade after 12 months, can't be established.
+
+Next step
+
+The most useful single step is a Step 18: as-of-date scoring, which scores each company at an actual public date against every other company's latest public quarter. It gives a real real-time test, and it is also the engine the live scoring of KSS, M, WOOF, DBI and PLCE needs anyway. After that, mid-size healthy controls plus additional failed retailers for held-out testing, then the Word documents.
+
+Shall I build Step 18 next? One decision first: should the held-out candidate list (extra controls and failed retailers) wait until after Step 18, or run in parallel? The extraction runs in your Colab, so it is your call.
+
+Step 18
+
+Size matching (17A Parts 1–3)
+
+What I got wrong last turn.
+
+-   I called the under-pressure group “size-comparable” using its median. It actually spans 1.0bn (BGFV) to 24bn (M), and KSS and M are bigger than every failed company except RAD.
+
+-   Healthy controls overlap more than I expected: ROST (18.9bn) and TJX (50bn) fall within 10x of 26 of 40 failed observations. But only 5 observations have three or more healthy matches, so matching is thin.
+
+Result. Against size-matched controls the fixed score gives:
+
+  -----------------------------------------------------------------------------------------------------
+  Match within   Leverage   AUC (interval, failed companies only)      Size-only AUC on the same sets
+  -------------- ---------- ------------------------------------------ --------------------------------
+  10x            lev2       0.56 (0.46–0.65), 5/8 above 0.5            0.63
+
+  10x            lev3       0.59 (0.49–0.67), 6/7                      0.72
+
+  3x             lev2       0.43, 5 companies, 13 of 24 observations   0.40
+
+  3x             lev3       0.48, 4 companies, 10 of 24 observations   0.46
+  -----------------------------------------------------------------------------------------------------
+
+-   No interval clearly excludes 0.5. The intervals resample failed companies only, so they are too narrow.
+
+-   Matching at 10x didn’t fully remove size. The size-only AUC is still 0.63–0.72, as large as the score’s own edge. The 3x versions lose about half the observations.
+
+-   This is low power, not proof the score is useless: 4–8 companies, 3–5 matched controls per observation. It also gives no evidence that the score adds anything beyond size.
+
+2. The under-pressure companies (17A Parts 4–5)
+
+Where companies sit on the core score (lev2, median):
+
+-   Highest: BBBY 0.81, EXPR 0.80, PLCE 0.89, BGFV 0.75, CONN 0.73, PRTY 0.71, TUEM 0.69, BIG 0.67.
+
+-   In the middle: WOOF 0.56, KSS 0.55, DBI 0.48, M 0.48, JOAN 0.52, RAD 0.45.
+
+-   Lowest: healthy companies at 0.25–0.56.
+
+Why BGFV and PLCE reverse the comparison. They aren’t noise. They look deteriorated on the signals.
+
+-   PLCE: gross margin fell 4–20 points and its leverage change sat at the 100th percentile from 2022Q2 to 2023Q3. Then 2024Q1 reversed sharply (score 0.03), so it looks like a stress episode followed by recovery.
+
+-   BGFV: driven by gross margin and inventory (inventory gap up to +52 points). Its leverage change is essentially zero, so its leverage percentile (0.4–1.0) is a ranking of very small differences, likely amplified by how tightly the peers cluster near zero. I haven’t verified that.
+
+-   Against each under-pressure company: the core score is 0.28 against BGFV and 0.28 against PLCE, but 0.71–0.80 against M, DBI and WOOF, and 0.56 against KSS. It separates failed companies from the rest of the under-pressure group moderately well, within thin samples (DBI and WOOF have 17–20 comparisons).
+
+-   What this means: the comparison asks whether the score can tell a failed retailer from an equally stressed one that survived (so far, per one secondary source for PLCE). With this sample it can’t.
+
+Signal by signal, failed vs under-pressure (AUC, two-way interval):
+
+  ------------------------------------------------------------------------------------
+  Signal                    All under-pressure   Without BGFV and PLCE (4 companies)
+  ------------------------- -------------------- -------------------------------------
+  Gross margin percentile   0.50 (0.26–0.81)     0.58
+
+  Inventory percentile      0.52 (0.31–0.73)     0.61
+
+  lev2 percentile           0.73 (0.51–0.92)     0.80 (0.63–0.97)
+
+  lev3 percentile           0.62 (0.41–0.79)     0.68 (0.51–0.83)
+
+  Core score lev2 / lev3    0.52 / 0.53          0.68 / 0.68 (0.37–0.88 / 0.43–0.87)
+  ------------------------------------------------------------------------------------
+
+Only the leverage-change signal separates failed from stressed, and barely. Gross margin and inventory add nothing there and dilute the combined score. This fits the Step 15 finding that leverage carries the score. I’m not reweighting. Choosing leverage-only now would be picking the winner on the same eight companies. It is a hypothesis to test on held-out data, and I’m recording it as that.
+
+3. Real-time design (17B Parts 1–4)
+
+The audit shows the strict real-time check I built is not a real-time test.
+
+-   Calendar alignment. The score compares each company with controls in the same calendar quarter. PRTY (December quarter ends), TUEM (also calendar quarter ends) and RAD’s last two quarters are compared with controls whose quarters end a month later, which hadn’t reported yet (n_public 0–2). So the strict version covers only 5–6 companies per bin. In the 3–6 bin those are BBBY, BIG, CONN, EXPR and JOAN. PRTY, RAD and TUEM drop out.
+
+-   Eligibility. DBI is never public in time, WOOF only 30%, TGT 42%, COST 50%.
+
+-   Late public dates. PRTY 2020-12-31 and RAD 2021-08 and 2021-11 first appeared as comparatives 10–14 months late. All four are unscored (COVID window), so no AUC is affected.
+
+-   The 18–27 bin is untestable. Only 10 of 24 observations are scored, from 4 companies. Other horizon bins have 12–16 scored observations.
+
+-   Strict AUC against the main method. 0.66–0.75 against 0.64–0.80, similar, with no sign that control timing inflates the main result. It rests on subsets, so I’m not calling it confirmation.
+
+-   A proper real-time version would score each company at its actual public date against every control’s latest public quarter. That needs a different alignment from the one the score was built on, so I’d declare it as a separate variant before running it.
+
+4. Horizon claims retracted (17B Parts 2–3)
+
+Step 16’s “holds to about 12 months, then fades” doesn’t survive. Binning by the date the score was computable instead of quarter end:
+
+-   lev2: 0.65, 0.74, 0.66, 0.72, 0.61 for under 3, 3–6, 6–12, 12–18 and 18–27+ months.
+
+-   lev3: 0.71, 0.80, 0.69, 0.69, 0.64.
+
+All intervals span roughly 0.4 to 0.9. The bin differences are smaller than the uncertainty, and bin membership changes company composition. I can’t show a longer lead time than the earlier numbers imply, or a decay.
+
+Evidence ledger (3–12 months, fixed score)
+
+  ---------------------------------------------------------------------------
+  Comparison                  lev2                    lev3
+  --------------------------- ----------------------- -----------------------
+  Failed vs all controls      0.70 (0.52–0.85), 8/8   0.74 (0.56–0.88), 7/8
+
+  vs healthy                  0.87 (0.71–0.97)        0.87 (0.72–0.97)
+
+  vs under-pressure           0.52 (0.16–0.75)        0.52 (0.20–0.87)
+
+  vs size-matched, 10x        0.56 (0.46–0.65)        0.59 (0.49–0.67)
+
+  Under-pressure vs healthy   0.78 (0.66–0.94)        0.67 (0.57–0.87)
+  ---------------------------------------------------------------------------
+
+Only the first, second and last rows have intervals that exclude 0.5. At 12–18 months no row does.
+
+Where this leaves the hypotheses
+
+-   H3: the score ranks failed and stressed retailers above large healthy ones. Failed above stressed is unproven, and the edge beyond size is unproven. I’d describe it as a stress screen.
+
+-   Ordering failed > under-pressure > healthy: half supported. Under-pressure above healthy holds, though size confounds it too, and I haven’t tested that. Failed above under-pressure doesn’t.
+
+-   Lead time: about 3–12 months at best. A longer lead, or a fade after 12 months, can’t be established.
+
+Next step
+
+The most useful single step is a Step 18: as-of-date scoring, which scores each company at an actual public date against every other company’s latest public quarter. It gives a real real-time test, and it is also the engine the live scoring of KSS, M, WOOF, DBI and PLCE needs anyway. After that, mid-size healthy controls plus additional failed retailers for held-out testing, then the Word documents.
+
+Shall I build Step 18 next? One decision first: should the held-out candidate list (extra controls and failed retailers) wait until after Step 18, or run in parallel? The extraction runs in your Colab, so it is your call.
+
+run them concurrently
+
+Running both tracks now. A research agent will build the held-out candidate list while I write and test Step 18 (as-of scoring, plus the live scoring of the five under-pressure companies).
+
+Step 18 is ready to run. The held-out research is done, but it shows a held-out test is much harder than planned. It is mock-tested only, so the mock numbers mean nothing.
+
+Step 18: as-of-date scoring and live scores
+
+This is the real-time version of the same fixed score. On each failed observation’s public date, every control is represented by its latest quarter whose inputs were all public by then. It drops the same-calendar-quarter alignment that left PRTY, TUEM and RAD out of the Step 17 strict check.
+
+What it prints:
+
+-   Part 1: whether the engine reproduces the old score. It shows the rank correlation and mean absolute difference against the Step 16 score, and how often each control was available.
+
+-   Part 2: AUC by horizon measured from the public date.
+
+-   Part 3: a ledger of failed vs all controls, healthy only and under-pressure only, plus under-pressure vs healthy scored the same way.
+
+-   Part 4: each failed company on its own.
+
+-   Part 5: live scores for all 12 controls on the latest date in your data (or a date you set in LIVE_DATE). It includes the failed companies’ own score range 3–12 months before distress for context. These are relative stress rankings among 12 retailers, not forecasts.
+
+Choices to know about:
+
+-   A control is used only if its latest public quarter is 135 days old or less.
+
+-   Group-only comparisons need at least 4 available controls on the date. DBI’s public dates come from its restated gross profit, so it will rarely be available. That is a data quirk, not a result.
+
+-   Nothing is reweighted.
+
+  STEP 18
+
+  Step 18 results
+
+  The engine reproduces the old score. Rank correlation is 0.98 and the mean absolute difference is 0.03. It scores 44 observations as-of against 46 same-quarter. DBI is never available because its gross profit dates come from restated filings, which is a data quirk. TGT is available in only 44% of observations, which I haven’t explained. A small check is at the end.
+
+  Real-time alignment doesn’t change performance. By horizon from the public date:
+
++------------------+--------------------+--------------------+--------------+
+|   Horizon        |   lev2 AUC         |   lev3 AUC         |   Companies  |
++==================+====================+====================+==============+
+|   under 3 months |   0.67             |   0.71             |   4          |
++------------------+--------------------+--------------------+--------------+
+|   3–6            |   0.71 (0.49–0.91) |   0.78 (0.59–0.94) |   7          |
++------------------+--------------------+--------------------+--------------+
+|   6–12           |   0.74 (0.50–0.91) |   0.76 (0.53–0.93) |   8          |
++------------------+--------------------+--------------------+--------------+
+|   12–18          |   0.69             |   0.69             |   5–6        |
++------------------+--------------------+--------------------+--------------+
+|   18–27+         |   0.57             |   0.66             |   3          |
++------------------+--------------------+--------------------+--------------+
+
+  These are within a few points of Step 17. Only the lev3 3–6 and 6–12 intervals clearly exclude 0.5, and no decay with horizon can be shown.
+
+  Comparison groups, 3–12 months (lev2 / lev3):
+
+-   Failed vs all controls: 0.74 (0.53–0.90) and 0.77 (0.60–0.91). All 8 companies are above 0.5, and leaving any one out stays in 0.71–0.81. Both exclude 0.5.
+
+-   Failed vs healthy: 0.91 and 0.88. This stays size-driven.
+
+-   Failed vs under-pressure: 0.51 (0.27–0.76) and 0.59 (0.28–0.85). Neither excludes 0.5.
+
+-   12–18 months vs under-pressure: 0.43 and 0.48, with 0 of 4 and 1 of 5 companies above 0.5. The under-pressure companies score at least as high as the failed ones there.
+
+-   Under-pressure vs healthy: 0.80 and 0.70. This holds.
+
+  By company, 3–18 months (lev2 / lev3):
+
+-   Good in both versions: BBBY 0.88 / 0.83, EXPR 0.85 / 0.86, CONN 0.79 / 0.77, TUEM 0.81 / 0.88 (2 observations), PRTY 0.88 / 0.93 (2 observations), BIG 0.68 / 0.78.
+
+-   RAD is below chance again: 0.35 / 0.42, with every single observation 0.67 or lower.
+
+-   JOAN is near chance: 0.52 / 0.57.
+
+  Live scores (14 September 2026) show the score is not an alarm.
+
+-   BGFV can’t be scored, with no public quarter in the last 135 days. That fits the reported acquisition, which I haven’t verified.
+
+-   On lev2, HD scores 0.80 and WMT 0.70. The failed companies’ own scores 3–12 months before distress have a 25th/median/75th percentile of 0.58 / 0.67 / 0.80. So HD sits at the failed 75th percentile and WMT above their median.
+
+-   The raw numbers for both are benign. HD’s gross margin is +0.3 points, inventory gap +2.4 and debt about flat. They rank high only because peers are deleveraging faster (ROST debt −33%, DBI −18%, KSS −17%).
+
+-   The score is a pure rank among the peers on that date, with no absolute-level information. PLCE sits mid-pack (0.60 / 0.50) even though it has the largest raw leverage rise in the table.
+
+-   This is a false-positive problem. Don’t present these scores as stress signals, and always show the raw signals beside the ranks. The held-out protocol includes a false-positive table for this reason.
+
+  Your Route 2 plan
+
+  I agree with the sequence and the go/no-go before the expensive work. I’d change four things:
+
+1.  Overlaps are resolved by time-varying labels, not exclusion. A company’s quarters within 27 months before its own failure are positives and never controls. Earlier quarters are legitimate controls. This also handles LL Flooring, Pier 1 and Tailored Brands.
+
+2.  No separate “stressed” label in advance. My under-pressure labels were my own judgement and may be circular. Stressed survivors simply stay in the control group unlabelled.
+
+3.  The go/no-go test is mechanical. With the earlier start date, the 20 design companies must reproduce their existing 2020-onward values exactly, except where a year-on-year signal gains a value because earlier data now exists.
+
+4.  Self-timestamping is weak. Email the protocol to yourself or upload it to a public registry (for example OSF) for an independent timestamp.
+
+  One difference in framing: the existing evidence supports ranking failed companies above large healthy ones within about 12 months. It doesn’t support a short-term warning claim against stressed or size-matched retailers. The held-out test is built to answer that harder question.
+
+  What I found about extending the history
+
+  The helper recs_df has a hard-coded d["end"] >= "2019-01-01" filter. That is the first thing to change, and it is why the go/no-go regression test matters.
+
+  Delivered now
+
+-   heldout_protocol_v1.md (attached). Five items are marked [CONFIRM]:
+
+    1.  Results reported with and without fallback-event companies.
+
+    2.  Container Store included and flagged, with and without it shown.
+
+    3.  Control universe from dated December 2019 XRT holdings or S&P 400/600 constituents.
+
+    4.  Primary endpoint is 3–12 months pooled, with separate bins as secondary.
+
+    5.  Success criterion: for both lev2 and lev3, the size-matched 3–12 month interval’s lower end is above 0.5 and at least two thirds of failed companies are above 0.5, with at least 12 scored failed companies or the result is called inconclusive.
+
+  Reply “confirm all” or send changes. Freeze it before any held-out score is computed.

@@ -1,0 +1,10 @@
+# raw and large data
+data/raw/
+*.json
+*.pkl
+# credentials: never commit
+.env
+# editor / system
+__pycache__/
+.DS_Store
+~$*

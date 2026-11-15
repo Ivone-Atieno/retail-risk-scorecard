@@ -1,0 +1,603 @@
+Step 22
+
+Yes, we're still cleaning data. This is a second round of it, for the held-out failed companies, and it isn't the design-sample cleaning you already finished. The design sample's cleaning is done, and Step 20 confirmed its debt formulas reproduce from 2014.
+
+Why it's still going. The held-out test is only credible if the new companies are extracted under the same rules as the design sample, and no scores are looked at first. So each held-out company needs a checked inventory, revenue, cost-of-goods and debt series. Step 23 is the last diagnosis for the six companies that still have gaps.
+
+How much is left. I can't give you calendar time, since that depends on how fast you paste outputs. In pastes, my estimate is:
+
+1.  Step 23 (your next paste). It settles whether the Sears, Fred's and similar gaps are date offsets or real absences.
+
+2.  One more round, where I write the hand-checked debt formulas and a pre-stated tolerance for 52/53-week calendars. You confirm them against the filings.
+
+3.  One round to build the held-out quarterly table. It runs the design pipeline on the 20 held-out companies and rechecks that the design companies still match exactly.
+
+4.  One to two rounds for the control group. I haven't started this and it is the biggest remaining piece. The research agent's control list is survivor-biased, so I need a dated universe (for example the December 2019 XRT holdings).
+
+5.  Freeze the protocol, then run the test. I'd expect two to three runs, plus the write-up.
+
+That is roughly 5–7 more rounds before any held-out score exists. It has taken longer than I'd like, partly because of my own bugs in the earlier scripts.
+
+A time-box if you want one. Set a cutoff after step 3. If fewer than 12 held-out companies pass, we declare the held-out test inconclusive in advance and write the project up with that stated plainly. That is already what the protocol says. A project that reports "tested honestly, couldn't confirm" is stronger than one that stretches the data to reach 12. I'd also be comfortable stopping the held-out route earlier and finalising the documents on the design results, if your time is limited. That is your decision, and I'll plan around whichever you choose.
+
+Go ahead and paste the Step 23 output.
+
+STEP 23
+
+Step 23 settles the Sears, Fred's and Destination Maternity gaps, and one design rule I'd forgotten helps us.
+
+What Step 23 shows
+
+1. Sears, Fred's and Destination Maternity were a 53-week-year artifact, not missing data. In each case the year-earlier quarter end sits exactly 7 days from my 6-day test window, because the 2017 fiscal year had 53 weeks (it ended Feb 3, 2018). All four inputs exist at the nearest period end, 0 days away. The earlier "missing" counts were my probe being stricter than your pipeline. Your design code (step9.py) already matches the year-earlier quarter by date with a 15-day tolerance. So no new rule is needed, and these three companies are recovered, with 3 usable quarters each.
+
+2. Christopher & Banks is out for COVID, not for data. Its May and August 2020 quarters are blanked by the frozen COVID window, and inventory is also missing there. Only the Feb 2020 quarter is usable, which is one observation. I'd drop it, with the reason listed.
+
+3. RTW and hhgregg are real debt gaps, not date offsets.
+
+-   RTW has no debt value at its November 2019 quarter end (91 days from the nearest one) and none in the year-earlier window.
+
+-   hhgregg's revolver is tagged in some quarters and not others.
+
+I can't tell from the tags alone whether those missing quarters are zero debt or a tagging omission. The rule is not to fill holes, so they stay excluded unless a filing check shows a value.
+
+Updated count
+
+Adding Sears and Fred's to the 13 from the previous count, I get about 15 usable failed companies before extraction QA: Bon-Ton, Pier 1, Stein Mart, Stage, JCP, Tailored Brands, Ascena, GNC, Destination Maternity, Gordmans, PacSun, LL Flooring, iMedia, Sears and Fred's. Weaker: francesca's (1 effective observation), Aeropostale (little debt), hhgregg, RTW. Out: Christopher & Banks and Container Store. That is a margin of three over the minimum of 12, better than the one-company margin before.
+
+Sears needs one careful check. Its inventory total sits under the tag InventoryFinishedGoods instead of InventoryNet. Its cost of goods also has two candidate tags. Both need verifying against a balance sheet before they are used.
+
+Where we are in the work
+
+The data diagnosis is almost done. The next stage is mechanical: run these held-out companies through your existing cleaning pipeline (the same steps and rules, now with the 2014 start) and confirm the design companies come out unchanged.
+
+That needs a tag map (primary tag for each metric) for each held-out company. In Step 24 I'll propose those maps automatically from the best-covered tags and flag the ones that need your eye. I'd start with the Sears inventory and cost tags, the lease-inclusive debt tags and the 14-vs-17 debt gaps. You check only the flagged ones against filings.
+
+I'll write Step 24 next, once you say go.
+
+STEP 23 B
+
+The script is in the file check_filings.py. I tested the helper functions offline, but the SEC downloads only work from your Colab, so that part hasn't run yet.
+
+How to run it. Run your start-of-session cell first, so that BASE and HEADERS exist (HEADERS is your SEC User-Agent). Then paste the file into one cell and run it. It takes about a minute, because it pauses between SEC requests.
+
+What it checks. For each flagged item it reads the accession numbers from the companyfacts files you already have. It opens the actual filing and prints the XBRL value next to the matching line of the filing text.
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Item                                             What it answers
+  ------------------------------------------------ ---------------------------------------------------------------------------------------------------------------------------------------------------
+  Sears inventory (Oct 2017, Feb 2018, May 2018)   Is InventoryFinishedGoods the total "Merchandise inventories" line?
+
+  Sears revenue and cost (Q3 2017, Q1 2018)        Which cost tag pairs with which revenue tag? The two candidates are CostOfGoodsAndServicesSold and CostOfMerchandiseSalesBuyingAndOccupancyCosts.
+
+  Sears debt (Oct 2017, May 2018)                  Does the lease-inclusive total DebtAndCapitalLeaseObligations equal the long-term debt plus the capital lease lines?
+
+  RTW (Nov 2019, Nov 2018, Aug 2019)               In the quarters with no debt value, is debt zero or just untagged?
+
+  hhgregg (Jun and Sep 2015 and 2016)              Same question for its revolver.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+How to read the output. Compare each XBRL number with the number printed next to the same line item in the filing text. Sears reports in millions.
+
+-   Sears inventory, cost and debt: the XBRL value should equal the filing line. If it doesn't, we use a different tag, and that goes in the held-out tag map.
+
+-   RTW and hhgregg: "no value" plus a filing line showing nil or no borrowings means the debt was zero. The pipeline's no-guessing rule still stands, so a zero-debt quarter stays a hole unless we agree on a rule first. A filing line with a number means the tag is missing, and we add it.
+
+A few snippets may say "not found in the document text". That means the filing uses different wording, or the financial statements sit in a separate file. Tell me which and I'll adjust the search words. Please paste the full output. I'll then write Step 24, the tag map for all the held-out companies, with these answers built in.
+
+STEP 24
+
+The check did its job. Of the 18 proposed debt formulas, 11 hold up against the filings, 6 are wrong, and 1 can't be verified. The wrong ones were my automatic proposals, not your data. If we had used them, the leverage signal for several failed companies would have been wrong.
+
+Part 3: formula value against the filing, line by line
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Company                            Formula value   Filing says                                                                        Verdict
+  ---------------------------------- --------------- ---------------------------------------------------------------------------------- --------------------------------------------------------------
+  Sears (Aug 2018)                   4,954           1,254 + 196 + 3,504 = 4,954                                                        ✔
+
+  Bon-Ton (Oct 2017)                 345.3           Revolver 664.6 + long-term debt 345.3 = about 1,010                                ✘ omits the revolver (66% of debt)
+
+  Pier 1 (Nov 2019)                  261.1           Same plus revolver borrowings 96.0, which was "—" in the prior periods             ✘ omits the revolver draw
+
+  Stein Mart (May 2020)              197.2           Current portion of debt 197,228, long-term "—"                                     ✔
+
+  Stage (Nov 2019)                   365.1           5.0 + 360.1                                                                        ✔
+
+  JCP (May 2020)                     4,884           Current portion 4,884, long-term "—"                                               ✔
+
+  Tailored (Feb 2020)                1,103.4         9.0 + 1,094.4                                                                      ✔
+
+  Ascena (May 2020)                  1,498.3         Current portion 1,498.3, long-term "—"                                             ✔
+
+  francesca's (Aug 2020)             12.1            Current portion 12,146                                                             ✔
+
+  RTW (Feb 2018)                     11.5            0.841 + 10.644                                                                     ✔
+
+  GNC (Dec 2019)                     862.6           180.566 + 681.999                                                                  ✔
+
+  Fred's (May 2019)                  95.1            80.6 + 14.4                                                                        ✔
+
+  Destination Maternity (Aug 2019)   26.6            Revolver 23.3 + current 3.8 + long-term 21.3 = 48.5                                ✘ off by 21.9, and I can't reconstruct why from the printout
+
+  hhgregg (Dec 2016)                 30.2            Line of credit 30,250                                                              ✔
+
+  Gordmans (Oct 2016)                26.1            Current portion 59.4 + long-term 26.1 = 85.5                                       ✘ omits the current portion
+
+  Aeropostale (Apr 2016)             73.5            Related-party debt 144.2 + short-term 73.5 = 217.7, and Jan 2016 was 5.0 + 138.0   ✘ omits the related-party loan
+
+  PacSun (Oct 2015)                  97.6            Revolver 35.0 + long-term 97.0                                                     ✘ omits the revolver
+
+  LL Flooring (Mar 2024)             89.0            The script printed no filing lines                                                 ? unverified
+
+  iMedia (Oct 2022)                  193.0           98.2 + 94.8                                                                        ✔
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-   The error pattern is not harmless. Bon-Ton and Gordmans would show false deleveraging, because the omitted piece moves between current and non-current. For Gordmans the formula gives a change of −1.6m against a true change of about +20m. The others understate a rising revolver. All of these lean against the score, and I don't want to leave "conservative" errors in the data.
+
+-   Cause. My proposal rule picks one tag family and misses companies that report the revolver, the current portion, or a related-party loan separately. A one-quarter spot check per company only catches what happens to show up in that quarter. After the fixes I'll check three quarters per company.
+
+-   Aeropostale may be a custom (non-us-gaap) tag. The debt cell loads only the us-gaap namespace, so it cannot see custom tags. Step 25 searches every namespace.
+
+A correction to what I told you earlier
+
+I said hhgregg had "zero debt throughout". It did not. It drew $30.25m on its revolver by Dec 2016, three months before filing. That quarter falls outside the 3–12 month primary window, because its filing came about 3 weeks before the petition. For the 2014–2016 quarters in the window, zero is still right.
+
+Part 2: gap quarters
+
+22 quarters have no formula value:
+
+-   20 are ZERO-LIKELY: RTW 8, francesca's 4, hhgregg 4 and LL 4.
+
+-   2 have a real debt line: Tailored's May 2020 (current portion 1,434.1) and GNC's Mar 2020 (current portion 895.0). Both are COVID-blanked quarters, so they don't affect the primary window. They are documented here.
+
+RTW is reliable. Its dashes and tie-outs were read earlier. Debt was repaid in Q1 2018 and stayed at zero.
+
+The other "no debt line" results are weaker than they look. My keyword list lacks "indebtedness". Fred's balance sheet says "Current portion of indebtedness", and Aeropostale's says "Indebtedness to related party". francesca's, LL and hhgregg 2014 are classed "no debt line", so they could be false zeros if they use that wording. Read those by eye, or rerun after I add the word. This could change the 20 count.
+
+Part 1: the other tag-map items
+
+-   Revenue flags for Stein Mart, Stage, JCP, Tailored, francesca's, RTW, GNC, Fred's, Destination Maternity, LL and iMedia ask me to confirm the stitched tags don't overlap. Your pipeline's rule handles this: an alternate tag must agree within 1% or have no overlap. I'd confirm when we run it, not before.
+
+-   Ascena has InventoryFinishedGoodsNetOfReserves as its only inventory tag, with no InventoryNet. That's plausible but unverified.
+
+-   Sears is verified.
+
+-   JCP's May 2020 quarter was filed after the petition. The as-of date handles that, but I'll check it explicitly in the held-out run.
+
+Way forward
+
+1.  Run Step 25 (step25.py, the file I just sent). It lists every debt-like fact at the problem quarters for 7 companies, across all namespaces. A star marks the ones that equal a number we saw in the filing.
+
+2.  Tell me which tags form the total for each company. I'll write the corrected formulas with revolver, current portion and related-party debt, and a three-quarter spot check for all 18.
+
+3.  Then I'll rerun the keyword scan with "indebtedness" added and write the manual zero rows (RTW 8 quarters, plus any confirmed others) as a documented override file.
+
+4.  After that, the held-out quarterly table.
+
+We are still in extraction QA. This round found six real data errors, so it was worth doing before any score existed.
+
+STEP 25
+
+Step 25 found the missing components for five of the seven companies. For two, the data isn't in XBRL at all. I've put the corrections into Step 26, which ties them out against the filings at four quarters per company.
+
+What Step 25 shows, company by company
+
+Bon-Ton.
+
+-   In Oct 2017 the revolver (664.6) sits under the tag LineOfCredit and long-term debt (345.3) under LongTermDebtNoncurrent.
+
+-   In Apr 2017 there is no LineOfCredit fact, because the revolver was inside LongTermDebtNoncurrent (894.9) at that date.
+
+-   So Bon-Ton's debt moves between tags, and the formula LongTermDebtNoncurrent + LongTermDebtCurrent? + LineOfCredit? handles both.
+
+-   The risk is LineOfCredit carrying a different meaning in some quarter, as it does for Destination Maternity below. The four-quarter check tests that.
+
+Pier 1.
+
+-   No XBRL fact equals the 96.0 revolver at Nov 2019, and Aug 2019 shows only long-term debt (258.9) and the current portion (2.4).
+
+-   The likeliest reason is that the revolver is tagged with a dimension, and companyfacts leaves dimensional facts out.
+
+-   So this cannot be fixed with a formula. The revolver balances have to be read from the filings by hand.
+
+-   The affected quarters are the June and Aug 2019 10-Qs, which fall in the 3–12 month window. The Nov 2019 filing came about 6 weeks before the petition, so it is outside the window.
+
+-   Step 26 will list Pier 1 as missing the revolver, which confirms the gap.
+
+Destination Maternity. I can now explain the earlier 26.6 vs 48.5 mismatch. The actual revolver is LinesOfCreditCurrent = 23.3. The LineOfCredit fact I had included is only 1.379, a different quantity. That explains 21.343 + 3.841 + 1.379 = 26.563. The correct formula uses LinesOfCreditCurrent and drops LineOfCredit.
+
+Gordmans.
+
+-   The total including current maturities is tagged directly: ...IncludingCurrentMaturities = 86.4 (Oct 2016) and 66.2 (Oct 2015).
+
+-   Its parts are 59.397 current and 26.074 non-current.
+
+-   The 0.9 difference is unamortized issuance costs (0.928 in the output).
+
+-   The earliest-filed Oct 2015 values (37.739 and 28.428) are the originals. A later filing restated them to 37.247 and 27.744 after the debt-issuance-cost accounting change. The two-year comparison would mix bases by about 1%. I'd use the consistent gross total, and the 20m real increase swamps the 1% difference.
+
+Aeropostale.
+
+-   The related-party loan sits in DueToRelatedPartiesCurrent (144.2 in Apr 2016, 5.0 in Jan 2016) and DueToRelatedPartiesNoncurrent (138.0 in Jan 2016).
+
+-   ShortTermBorrowings (73.5) is the revolver, and LineOfCredit (73.5) is a rounded duplicate that I must not add.
+
+-   True debt went from about 143.0 to 217.7 in one quarter.
+
+-   Caution: "due to related parties" can mean other things, such as payables to the related-party supplier. It matches the filing's "Indebtedness to related party" line in these two quarters, so I'm confident for them. Earlier quarters need the check.
+
+PacSun. Long-term debt 97.0, revolver (LinesOfCreditCurrent) 35.0 and the current portion 0.6 give 132.6. LongTermDebt (103.1) is gross of the discount, so I'd use the net figure to match the balance sheet.
+
+LL Flooring. The tag LongTermLineOfCredit (89.0 in Mar 2024, 77.0 in Sep 2023) is the only debt fact, and it is plausible. Its tie-out to the filing is still unconfirmed, because Step 24 printed no filing lines for it.
+
+Two things Step 25 added
+
+-   Bon-Ton's revolver, Pier 1's revolver and Destination Maternity's revolver are all separate balance-sheet items that XBRL tags inconsistently. A formula chosen per company from one tag family can miss them. That is why the four-quarter tie-out matters, not just one quarter.
+
+-   An unfixable class exists. Pier 1 shows that some debt isn't reachable through companyfacts. For those companies, manual rows from the filing are the only route. Anything like that must be recorded with its source accession.
+
+Step 26
+
+The file I just sent is step26.py. I tested the logic offline on a Bon-Ton-like mock. It catches a missing revolver, but it hasn't run on real filings. It does three things:
+
+-   Applies the six corrected formulas. Gordmans and Aeropostale use the new tags, Destination Maternity and PacSun use LinesOfCreditCurrent, and Bon-Ton includes LineOfCredit?. Pier 1 stays unchanged on purpose.
+
+-   Checks four quarters per company (first, two middle, last) against the balance-sheet debt lines in the filing. The verdicts are TIES to all debt lines, TIES to a subset (it names what's missing), and NO TIE.
+
+-   Saves tag_map_heldout_v2.csv and debt_tieout_v2.csv.
+
+The verdicts are a heuristic: an automatic check on numbers in the filing text. Anything not TIES still needs a human read. Please paste the full output.
+
+What comes after
+
+1.  Read the Pier 1 June and Aug 2019 balance sheets and decide the manual revolver rows.
+
+2.  Rescan the gap quarters with "indebtedness" added to the keywords, then write the manual zero rows for RTW and any others confirmed.
+
+3.  Build the held-out quarterly table.
+
+STEP 26
+
+Step 26 caught one real new error (Stein Mart double-counting debt) and confirmed Pier 1's revolver problem. It also showed my checking script has bugs. The summary (41 ties, 28 "no tie", 7 "subset") overstates the problem, because many of the "no tie" cases are false alarms from the script.
+
+What the output shows
+
+Real findings:
+
+-   Stein Mart double-counts debt. Its formula adds a LineOfCredit fact on top of long-term debt, and the filing's long-term debt line already contains that revolver.
+
+    -   Apr 2017: formula 306.6, filing lines 8.3 + 149.1 = 157.5.
+
+    -   May 2018: formula 354.8, filing lines 159.4 + 49.3 = 208.7.
+
+    -   May 2019: formula 271.8, filing 153.0.
+
+    -   May 2020: formula 197.2, which is right (no LineOfCredit fact that quarter).
+
+Earlier I called Stein Mart "OK" from that one May 2020 quarter. That was wrong. I've dropped LineOfCredit from its formula, and the fixed formula reproduces the filing lines in all four checked quarters.
+
+-   Pier 1's revolver is missing in two of the four quarters checked. In Nov 2016 it was 25.0 (formula 201.4 vs 226.4 with it) and in Nov 2019 it was 96.0. Nov 2017 and Nov 2018 tie, with no revolver. XBRL never carries it, so only the filings do. Step 27 will list every quarter's revolver so you can sign off the manual rows.
+
+Confirmed fine at all four quarters: Bon-Ton (978.9, 1,005.6, 970.9, 1,009.9), Tailored Brands, Ascena, RTW, Destination Maternity (43.3, 39.3, 36.0, 48.5) and hhgregg (0, 0, 0, 30.2).
+
+Fine on my own hand check, though the script said otherwise:
+
+-   Sears: all four tie. The "subset" flag came from a footnote ("includes balances held by related parties") that my script mistook for a debt line. For example 164 + 550 + 2,837 = 3,551.
+
+-   JCP: ties to the debt lines. The line it flags is "capital leases, financing obligation and note payable" (219), which the design definition excludes as leases.
+
+-   Stage: the formula equals the filing exactly where I can check. At Feb 2019, 250.294 + 4.812 = 255.106, and 4.812 is in the Nov 2019 filing's prior-year column.
+
+-   PacSun: each quarter equals long-term debt plus about 0.5 of current portion, plus the 35.0 revolver in Oct 2015.
+
+-   Gordmans: the first three quarters tie. The fourth is a 1.1% gross-versus-net issuance-cost difference, which I treat as a tie.
+
+-   Fred's: 95.1 = 80.6 + 14.4.
+
+-   francesca's: 20.0 = 10.0 + 10.0 is consistent.
+
+-   Aeropostale: Apr 2016 ties at 217.7, Jan 2016 is 143.0 and Feb 2014 is zero. The two quarters between aren't confirmed.
+
+Not verified:
+
+-   GNC: only Dec 2019 (862.6 = 180.6 + 682.0) is confirmed by hand.
+
+-   iMedia: only Oct 2022 ties.
+
+-   LL Flooring: none tie. The script found no debt lines in any of its filings.
+
+The bugs in my checker (Step 26)
+
+I need to own these:
+
+1.  A filter meant to skip "deferred rent" also matched "Current" (the word "rent" at its end). It silently dropped lines such as "Current portion of debt" and any line right after "Total current liabilities". That is the usual position of long-term debt, and it explains LL Flooring.
+
+2.  Footnote text like "(Note 7)" was read as the amount, which broke GNC. "Related parties" footnotes were read as debt lines, which broke Sears.
+
+3.  The tolerance of 0.4% rejected normal gross-versus-net issuance cost differences.
+
+Step 27
+
+The fixed version is in the file I just sent (step27.py).
+
+-   The parser is fixed on all three points.
+
+-   It picks the balance sheet by requiring "total liabilities" to follow it, which stops iMedia's MD&A paragraphs being read.
+
+-   The tolerance is 1.3%.
+
+-   It runs every quarter in the window and prints only exceptions plus a per-company count. Expect 10–15 minutes, and rerun if it stalls.
+
+-   It applies the Stein Mart fix and saves tag_map_heldout_v3.csv and debt_tieout_v3.csv.
+
+It is still a heuristic. A "ties" verdict means the formula equals the sum of the debt lines it found. It can't tell me a line was missed. I'll read the exceptions with you.
+
+Please paste the output. The next steps are the Pier 1 revolver rows, the RTW zero rows, and the held-out quarterly table.
+
+STEP 27
+
+Step 27 confirmed that 12 of the 18 held-out debt series tie to the filings in every quarter checked. It also found two more double-counting errors, and it showed that my checker's last change introduced a new bug.
+
+Verified in every checked quarter
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Company                 Quarters   Note
+  ----------------------- ---------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Sears                   13 of 13   
+
+  Bon-Ton                 13 of 13   The revolver fix works.
+
+  Stein Mart              13 of 13   Confirms that dropping LineOfCredit was right.
+
+  Tailored Brands         12 of 12   
+
+  Ascena                  13 of 13   
+
+  Fred's                  12 of 12   
+
+  Destination Maternity   13 of 13   
+
+  hhgregg                 8 of 8     
+
+  RTW                     4 of 4     Plus 8 zero quarters pending.
+
+  GNC                     12 of 12   Three were flagged, but the extra "line" was convertible preferred stock under mezzanine equity (211.4), which is not debt. The real values tie: 888.4, 854.7 and 152.9 + 705.7 = 858.6.
+
+  JCP                     14 of 14   Nine were flagged for a "capital leases, financing obligation and note payable" line of 204–219. The formula excludes it, the same rule as the design companies without lease tags. It is about 5% of debt, constant and declining. I'd record this as a documented choice.
+
+  Gordmans                12 of 12   Two differ by 1.0 (about 2%). That is unamortized issuance costs, gross versus net.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Two more double-counting errors
+
+-   francesca's: the formula says 20.0 at Aug 2019, and the filing says long-term debt 10.0 with the current portion nil. LineOfCredit or LongTermLineOfCredit duplicates the long-term debt line, the same pattern as Stein Mart. The earlier spot check missed it because it only looked at Aug 2020.
+
+-   iMedia: the formula says 113.8 at May 2020, and the filing says 2.5 + 55.7 = 58.2. At Jul 2021 it says 147.8 against 73.9, exactly double. LongTermLineOfCredit duplicates long-term debt. Only Oct 2022 (98.2 + 94.8) was right.
+
+Both formulas now drop the line-of-credit terms. A lesson: when a company's revolver is the long-term debt, adding a line-of-credit tag counts it twice. Bon-Ton and Destination Maternity don't have this problem, as their tie-outs show.
+
+Results that are my parser's fault
+
+My Step 27 change to look back 40 characters for "deferred" also caught the previous line's label ("Deferred rent …"). So lines following those were dropped. That affects:
+
+-   PacSun: 8 NO TIE with no lines found.
+
+-   LL Flooring: 8 NO TIE with no lines found.
+
+-   Stage: 2 NO TIE.
+
+-   Pier 1: all 13 "NO BALANCE SHEET FOUND", because I required the words "total liabilities" after the section and Pier 1's statement lacks them.
+
+-   Aeropostale: a hyphen in "Indebtedness to related party - non-current" was read as a dash, giving 0.
+
+For Stage, the gaps are about 3.0 in both flagged quarters, which matches its usual current portion of debt, so I expect a tie. Treat these as unverified, not as errors.
+
+What is still genuinely open
+
+-   Pier 1: the revolver is missing from XBRL. It was 25.0 at Nov 2016, nil in Nov 2017 and Nov 2018, and 96.0 at Nov 2019. The other quarters still need reading.
+
+-   Aeropostale: the quarter ending Aug 2, 2014 shows a formula value of 133.6, but I thought its related-party loan began in September 2014. I may be wrong about the date. I want to see the balance sheet text for that quarter before trusting it.
+
+-   LL Flooring, PacSun, Stage: can only be judged after the parser fix.
+
+Step 28
+
+The file I just sent is step28.py. I tested the parser on small examples and the whole script on a mock, but not on real filings. It does five things:
+
+-   Fixes the three parser issues: the label look-back, the hyphen reading and the balance-sheet region fallback. It also excludes preferred stock.
+
+-   Applies the francesca's and iMedia formula fixes.
+
+-   Re-checks only the seven companies still open, so it should take a few minutes.
+
+-   Prints every debt line for Pier 1 in every quarter, so the revolver amounts can be read off.
+
+-   Prints the actual balance sheet text for Aeropostale at Aug 2014 and francesca's at Nov 2019.
+
+Please paste the full output. After that we can set the Pier 1 revolver rows and the RTW zero rows, and build the held-out quarterly table.
+
+STEP 28
+
+Step 28 settled most of the open items. Pier 1's revolver amounts can now be read off, and three more companies tie.
+
+Results, company by company
+
+Pier 1: every quarter is now readable. The "Borrowings under revolving line of credit" line shows:
+
+  -------------------------------------------------------------------------
+  Quarter end                             Revolver    Formula   True debt
+  --------------------------------------- ----------- --------- -----------
+  Nov 2016                                25.0        201.4     226.4
+
+  Feb 2017 – Mar 2019 (nine quarters)     none or 0   ties      ties
+
+  Jun 2019                                20.0        247.3     267.3
+
+  Aug 2019                                55.0        261.3     316.3
+
+  Nov 2019                                96.0        261.1     357.1
+  -------------------------------------------------------------------------
+
+Only four quarters need a manual row. The rest of the series ties as is. The revolver draws in Jun and Aug 2019 are real leverage increases in the primary window. The Nov 2019 filing came about six weeks before the petition, so it falls outside the window.
+
+francesca's: 8 of 8 tie after the fix. The Nov 2019 balance sheet shows long-term debt 18,904 at Nov 2019, 10,000 at Feb 2019, and nil at Nov 2018. That matches the corrected formula.
+
+PacSun: 8 of 8 tie. The earlier failures were my parser.
+
+iMedia: 10 of 11 tie. The one exception is Oct 2021, with formula 120.4 against a printed lines total of 46.65 (credit facility). The 73.75 difference is probably a term loan the parser didn't read. I want to see the balance sheet text.
+
+Stage: 10 of 12 tie. The other two (Apr and Jul 2017) leave a residual of about 3.0 against the printed long-term debt, which fits a typical current portion. The parser still misses the current-portion line there. I rate it likely but not confirmed.
+
+Aeropostale: the formula is right, and I was wrong. The Aug 2, 2014 balance sheet text prints "Indebtedness to related party – non-current (See Note 3) 133,590". That matches the formula's 133.6. I had thought the related-party loan began in September 2014, but it was already on the balance sheet at the end of Q2. The two "NO TIE" quarters are my parser failing on "(See Note 3)" and reading the 3 as the amount. I have fixed that in the next version.
+
+LL Flooring: still no lines found in any of the 8 quarters. The formula values (15, 69, 72, 47, 40, 77, 66, 89) look like revolver balances in round millions, but I can't tie them to the filing. Either my parser doesn't see LL's balance sheet or its wording differs. I need to see the text.
+
+Tally of the 18
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Status                                           Companies
+  ------------------------------------------------ -------------------------------------------------------------------------------------------------------------------------------------------------
+  Verified at every checked quarter (15)           Sears, Bon-Ton, Stein Mart, Tailored, Ascena, Fred's, Destination Maternity, hhgregg, RTW, GNC, JCP, Gordmans, francesca's, PacSun, Aeropostale
+
+  Verified once the Pier 1 manual rows exist (1)   Pier 1
+
+  Mostly verified, small gaps (2)                  Stage (2 quarters), iMedia (1 quarter)
+
+  Unverified (1)                                   LL Flooring
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Counting, there are 17 companies with a formula that ties everywhere except for these small gaps. LL Flooring is the exception.
+
+What I want to do next (Step 29)
+
+The file I just sent is step29.py. I tested the logic on a mock with only a single mock filing, so Pier 1's four rows only checked the arithmetic and the zero-rows only the logic. It does three things:
+
+1.  Part A: adds the Pier 1 revolver to the formula value for the four quarters, and records the source accession for each. It prints the numbers so you can confirm them.
+
+2.  Part B: rescans the gap quarters for RTW, francesca's and hhgregg with the fixed parser. It writes a zero row only when the balance sheet is found and has no positive debt line. If it finds a positive debt line it does not write a zero. All the manual rows are saved to manual_debt_overrides.csv.
+
+3.  Part C: prints the actual balance sheet text for LL Flooring (Mar 2024 and Dec 2021), iMedia (Oct 2021) and Stage (Apr 2017), so the three open cases can be read by eye.
+
+Please paste the whole output. After that, the debt extraction will be settled, and the next stage is building the held-out quarterly table.
+
+STEP 29
+
+The 18 held-out debt series are now essentially clean. That finishes the failed-company side of extraction. I also need to correct my earlier estimate of what is left.
+
+Step 29 results
+
+Pier 1. The four manual rows were built from the formula value plus the revolver on the balance sheet, each with its source filing:
+
+-   Nov 2016: 226.373m
+
+-   Jun 2019: 267.304m
+
+-   Aug 2019: 316.338m
+
+-   Nov 2019: 357.129m
+
+Zero quarters. 16 gap quarters are confirmed zero with a filing accession each: RTW 8, francesca's 4 and hhgregg 4. This used the fixed parser, which includes "indebtedness". A quarter becomes zero only when the balance sheet was found and has no positive debt line. Together with the 4 Pier 1 rows that makes the 20 manual rows. I'd still glance at the CSV before using it.
+
+The three open balance sheets:
+
+-   LL Flooring: the line is called "Credit Agreement", so my parser never matched it. It reads 89,000 at Mar 2024 and 66,000 at Dec 2023, and the formula's 89.0 and 66.0 tie. It was nil at Dec 2021 (the year before: 101,000 at Dec 2020).
+
+-   iMedia (Oct 2021): long-term credit facility 46,650 + "8.50% Senior Unsecured Notes" 73,768 = 120.418 against the formula's 120.4. It ties. My parser missed the notes line because I only looked for "senior notes".
+
+-   Stage (Apr 2017): the balance sheet face has no separate current-debt line. Long-term debt obligations are 219,756, against the formula's 222.8. The 3.0 difference is a current portion that appears to sit inside "accrued expenses and other current liabilities". That is an inference from the size of the difference, so I'm calling it resolved with a caveat. It is 1.4% of that quarter's debt.
+
+So all 18 held-out debt formulas now tie to the filings. The exceptions are Stage's 2 quarters above and the JCP lease exclusion.
+
+Step 30
+
+The file I just sent is step30.py. I tested its logic on a mock; it hasn't run on real data. It has two parts:
+
+-   Part A: re-reads LL Flooring with "credit agreement" added. It confirms the formula quarters and writes zero rows for LL's 2021 gap quarters, if the filing shows no credit agreement balance.
+
+-   Part B: builds the held-out debt table in the format of debt_quarterly_final.csv, with columns ticker, end, total_m, qoq_pct, flag, detail and gross_m. It uses the formula for every quarter end from 2014, and the manual rows override or fill. It then counts the quarters left with no debt value. Many of those fall outside the 40 months I checked against filings, so they may need a look.
+
+An honest correction to my earlier timeline
+
+I said the whole job was about 5–7 more rounds. I underestimated one part, the control group.
+
+-   The primary test compares failed companies with size-matched controls, within 3x of each failed company's sales. Failed sales are roughly 0.3–5bn.
+
+-   Of your design controls, only DBI, BGFV, PLCE and WOOF come close, and WOOF only from 2020. So the primary test needs a new, dated universe of mid-size retailers (the XRT December 2019 holdings plan).
+
+-   Each control needs the same extraction work as the failures: tags, a debt formula and checks. That was about a dozen rounds for 18 failed companies, with my own parser bugs causing much of the delay.
+
+-   The tie-out tool now works. It ties about 75% of quarters automatically, and the failure patterns are known (revolvers double-counted, current portions, tag switches). So I'd expect the control side to go faster, perhaps 5–8 rounds for about 25 controls. I'd rather give you that range than another optimistic number.
+
+There is also a pipeline step to run: the held-out failed companies still have to go through your existing cleaning cells (tag maps, quarter grid, features). Your cells are in your notebook, and I'd prepare the inputs for them.
+
+Decision for you
+
+After Step 30, the options are:
+
+1.  Continue to the full design: build the controls (about 25) and run the pre-registered test. It takes the most time and gives the most credible result.
+
+2.  Compare failed companies against your 12 design controls only. It is quick and uses data we already have. But the size mismatch is exactly what the earlier results showed makes it uninformative.
+
+3.  Stop here and write up. The deliverable would be the design-sample results plus an honest account of the extension: the extraction audit, the 18 clean failed-company series, and why the control group is missing. That is a legitimate end point, and I'd write it carefully.
+
+I recommend option 1 only if you have the time. Otherwise option 3 is a better use of it than option 2. Please run Step 30 and paste the output, and tell me which option you'd like.
+
+STEP 31
+
+The failed-company debt side is now finished, and the combined control script is ready (file step31.py). I tested it end to end on a small mock universe, but it hasn't touched real SEC data yet.
+
+Step 30 results
+
+-   LL Flooring: all 8 quarters with a formula value tie to the "Credit Agreement" line (15, 69, 72, 47, 40, 77, 66, 89). Its four 2021–Mar 2022 gap quarters are confirmed zero with filing accessions.
+
+-   Manual rows: the file now holds 24 rows, which is Pier 1's 4 plus the 20 zero quarters (RTW 8, francesca's 4, hhgregg 4, LL 4).
+
+-   Debt table: it has the Step 7 columns, with 17 held-out companies under their pipeline tickers.
+
+-   Remaining MISSING quarters are all irrelevant to the primary window:
+
+    -   All of them are early quarters: DEST, LL, RTW and SMRT in 2014–15, FRAN to Jul 2017, SSI and IMBI in 2014–15.
+
+    -   Their year-ago bases would only matter for quarters more than 12 months before the 3–12 month window.
+
+    -   GNC (Mar 2020) and Tailored (May 2020) are COVID-blanked.
+
+-   The one warning is a pandas FutureWarning about pct_change. It is harmless.
+
+So the held-out failed side is complete for debt.
+
+Step 31: what the script does
+
+I combined the control work into one run.
+
+1.  Universe. It downloads the SEC's financial statement data sets for 2019 Q1 and Q2 (sub.txt only) and keeps US retail-SIC 10-K filers. That is SIC 5200–5499, 5531, 5600–5799 and 5900–5999, with restaurants and car dealers excluded.
+
+2.  Size gate. It downloads each company's facts and keeps those with annual revenue between 250m and 20bn, set from the failed companies' sales. The design-sample and held-out failed companies are left out of the new batch.
+
+3.  Events. It checks every company in range for any Item 1.03 8-K since 2014. A hit marks a NEW FAILED company. That removes a flaw I should have caught earlier: my curated failed list could miss bankruptcies, and an unlisted failure would sit in the control group as if healthy.
+
+4.  Extraction and debt tie-out.
+
+    -   For each company it checks core data coverage: revenue, cost or gross profit, and inventory must each cover at least 85% of quarters since 2014.
+
+    -   It tests 17 candidate debt formulas against the balance-sheet debt lines in the filings at 6 sampled quarters. It picks the best-agreeing one, and the company passes if at least 5 of 6 tie and 80% of quarters are covered.
+
+    -   If a company has no debt facts and no debt lines in the sampled filings, it counts as zero debt (call this rule R2).
+
+5.  Output: one line per company, then a summary, and files controls_summary.csv and universe_size_gate.csv.
+
+Caveats you should know
+
+-   Universe limits. It covers Dec and Jan fiscal year ends well, but retailers with March–November year ends are underrepresented. Say this in the write-up.
+
+-   Selection by data quality. Companies fail the gate only on data completeness and filing agreement, never on outcomes. But complicated debt might correlate with distress, so I'll report how many were excluded and why.
+
+-   Rule R2 (no debt anywhere, so zero for all quarters) is a new rule. I'd add it to the protocol before the run.
+
+-   Timing. The first download is about 100MB, then a few hundred companies' facts, then up to about 9 filings per company. Expect 30–60 minutes, with one line per company printed as it goes. It saves each company as it finishes, so after a Colab timeout you simply run the cell again.
+
+-   Likely failure points: the SEC data-set download (a 403 or a bad URL) would stop it right away, in Part 1. If that happens, paste me the error.
+
+Please run it and paste the full output. When it's done, I'll turn the passing controls into the pipeline inputs and write the frozen protocol.
+
+STEP 32

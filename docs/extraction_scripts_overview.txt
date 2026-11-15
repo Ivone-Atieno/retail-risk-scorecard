@@ -1,0 +1,1121 @@
+Retail Financial Risk Scorecard
+
+Data extraction and exploration scripts
+
+Portfolio Project 2 | SEC EDGAR data pipeline | Stages 2 and 3: gather
+and understand the data | 1 October 2026
+
+1. Project at a glance
+
+Data source: SEC EDGAR, XBRL "companyfacts" API (free, public, one JSON
+file per company).
+
+Sample: 20 US-listed retailers: 6 healthy, 6 under pressure, 8 that
+failed (bankrupt or delisted). Every company is identified by its CIK
+number, never by ticker.
+
+Problem statement
+
+US retailers operate on thin margins with heavy inventory and lease
+commitments, making them vulnerable when consumer demand weakens. Using
+quarterly SEC EDGAR filings from 2019 to the present, this project
+examines 20 US-listed retailers, including healthy leaders, struggling
+companies, and retailers that went bankrupt, to identify financial
+warning signs that appear before distress events. Signals tracked are
+gross margin trend, debt-to-equity, inventory growth relative to sales
+growth, current ratio, free cash flow and net income. A composite health
+score ranks the companies, and the project tests whether this score
+would have flagged the bankrupt retailers as weak in the quarters before
+they failed.
+
+Hypotheses
+
+-   H1: Retailers that later went bankrupt showed falling gross margin
+    and rising leverage for several quarters beforehand.
+
+-   H2: Inventory growing faster than sales appears before financial
+    distress.
+
+-   H3: A simple composite score ranks the failed retailers lower than
+    healthy ones before they failed.
+
+-   H4: Retailers that later failed filed their quarterly reports
+    progressively later than normal in the quarters before failure.
+
+2. Workflow and project folder
+
+  -------------------------------------------------------------------------
+  Stage        What happens                         Status
+  ------------ ------------------------------------ -----------------------
+  1. Define    Question, scope, metrics, hypotheses Done
+  problem                                           
+
+  2. Gather    Choose companies, download raw JSON  Done: 20 of 20 files
+  data         for each                             saved
+
+  3.           Explore raw files, build the data    In progress (2
+  Understand   dictionary                           companies explored so
+  data                                              far)
+
+  4. Clean     Build tidy quarterly tables          Not started (draft
+  data                                              tools in scripts 9 and
+                                                    10)
+
+  5. Analyse   Ratios, scorecard, test H1 to H4     Not started
+  -------------------------------------------------------------------------
+
+Folder structure (in Google Drive)
+
+  retail_risk_project/
+
+  |-- companies.csv (20 companies: ticker, CIK, group, notes)
+
+  |-- raw/ (one untouched JSON file per company, named by 10-digit CIK)
+
+  |-- sec_utils.py (reusable helper functions, script 9)
+
+  `-- scripts/ (the scripts in this document)
+
+Running the exploration scripts in Google Colab
+
+-   Colab's own storage is temporary and is erased when the session
+    resets. Save everything in Google Drive.
+
+-   Scripts 6 to 10 read files from a relative raw/ folder. After
+    mounting Drive, run %cd /content/drive/MyDrive/retail_risk_project
+    once, and the relative paths will work.
+
+-   Every new Colab session: mount Drive again and rerun your settings
+    cell, because Colab forgets variables (but not Drive files).
+
+3. Script index
+
+  -------------------------------------------------------------------------------------------
+  #    File                                   Stage        Purpose               Status
+  ---- -------------------------------------- ------------ --------------------- ------------
+  1    01_lookup_ciks.py                      2: Gather    Look up a company's   Used
+                                                           CIK from its ticker   
+
+  2    02_verify_ciks.py                      2: Gather    Check every CIK in    Run; all
+                                                           companies.csv against CIKs
+                                                           EDGAR                 confirmed
+
+  3    03_check_bbby_cik.py                   2: Gather    Prove the Bed Bath &  Run
+                                                           Beyond ticker trap    
+
+  4    04_first_test_download.py              2: Gather    First API call: two   Run
+                                                           test companies        
+
+  5    05_colab_extract_all.py                2: Gather    Download all 20       Run: 20
+                                                           companies into Drive  files, no
+                                                                                 errors
+
+  6    06_explore_tag_availability.py         3:           Which XBRL tags exist Run
+                                              Understand   for each metric       
+
+  7    07_explore_duplicates_and_filings.py   3:           Duplicates, extra     Run
+                                              Understand   tags, filing dates    
+
+  8    08_explore_quarterly_revenue.py        3:           First clean quarterly Run
+                                              Understand   revenue series        
+
+  9    09_sec_utils.py                        4: Clean     Reusable helper       Drafted; not
+                                              (draft)      functions incl. Q4    yet run on
+                                                           derivation            real files
+
+  10   10_explore_q4_and_asof.py              4: Clean     Q4, year-over-year    Drafted; not
+                                              (draft)      and as-of cutoff      yet run on
+                                                           checks                real files
+  -------------------------------------------------------------------------------------------
+
+4. Stage 2: Gather the data
+
+Script 1: Look up a CIK from a ticker
+
+File: 01_lookup_ciks.py
+
+Stage: 2. Gather the data
+
+Purpose: The SEC identifies companies by CIK number. This reads the
+SEC's ticker file and returns the CIK for a ticker.
+
+Run in: Colab or local Python
+
+Status: Used to build the first draft of companies.csv.
+
+What it showed
+
+-   The file only lists currently active tickers, so bankrupt companies
+    are not in it. Their CIKs were found by searching the company name
+    on EDGAR.
+
+Code
+
+  import requests
+
+  headers = {"User-Agent": "Your Name your.email@example.com"} # SEC
+  requires a real name + email
+
+  url = "https://www.sec.gov/files/company_tickers.json"
+
+  tickers = requests.get(url, headers=headers).json()
+
+  # Build a ticker -> CIK dictionary (only lists CURRENTLY active
+  tickers)
+
+  lookup = {v["ticker"]: v["cik_str"] for v in tickers.values()}
+
+  print(lookup.get("WMT")) # should print Walmart's CIK (104169)
+
+Script 2: Verify every CIK against EDGAR
+
+File: 02_verify_ciks.py
+
+Stage: 2. Gather the data
+
+Purpose: Prints the company name EDGAR holds for each CIK next to the
+name in companies.csv, so wrong CIKs are caught before downloading.
+
+Run in: Colab, with companies.csv in the working folder
+
+Status: Run. All CIKs in companies.csv confirmed correct.
+
+What it showed
+
+-   One CIK recalled from memory (Joann) was off by one digit before
+    this check, which is why every CIK is verified.
+
+Code
+
+  import time
+
+  import pandas as pd
+
+  import requests
+
+  headers = {"User-Agent": "Your Name your.email@example.com"}
+
+  df = pd.read_csv("companies.csv")
+
+  # For every CIK in companies.csv, ask EDGAR what the company is
+  called,
+
+  # then compare it with the name in our own file.
+
+  for _, row in df.iterrows():
+
+  url =
+  f"https://data.sec.gov/submissions/CIK{int(row['cik']):010d}.json"
+
+  name = requests.get(url, headers=headers).json().get("name")
+
+  print(f"{row['ticker']:12} {row['company_name']:40} -> {name}")
+
+  time.sleep(0.12) # stay well under the SEC limit of 10 requests per
+  second
+
+Script 3: The Bed Bath & Beyond ticker trap
+
+File: 03_check_bbby_cik.py
+
+Stage: 2. Gather the data
+
+Purpose: Compares the original Bed Bath & Beyond with the company that
+later took over its ticker, to show why CIK is the only safe key.
+
+Run in: Colab
+
+Status: Run.
+
+What it showed
+
+-   CIK 886158 (original): name is now 20230930-DK-Butterfly-1, Inc.; no
+    tickers or exchanges; former name BED BATH & BEYOND INC; latest
+    filing 2023-12-04.
+
+-   CIK 1130713: now Neighborhood Intelligence, Inc., tickers NXH and
+    BBBYW on Nasdaq; former names include Bed Bath & Beyond, Inc. and
+    Overstock.com; latest filing 2026-09-25.
+
+-   Conclusion: tickers and names change over time. Always key data on
+    CIK.
+
+Code
+
+  import requests
+
+  headers = {"User-Agent": "Your Name your.email@example.com"}
+
+  # 886158 = original Bed Bath & Beyond (the one that went bankrupt)
+
+  # 1130713 = the company that later took over the BBBY ticker
+
+  for cik in [886158, 1130713]:
+
+  d =
+  requests.get(f"https://data.sec.gov/submissions/CIK{cik:010d}.json",
+
+  headers=headers).json()
+
+  print("CIK:", cik)
+
+  print(" Name: ", d.get("name"))
+
+  print(" Tickers: ", d.get("tickers"))
+
+  print(" Exchanges: ", d.get("exchanges"))
+
+  print(" Former names:", [n["name"] for n in d.get("formerNames", [])])
+
+  recent = d["filings"]["recent"]
+
+  print(" Latest filing date:", recent["filingDate"][0])
+
+  print()
+
+Script 4: First API call on two test companies
+
+File: 04_first_test_download.py
+
+Stage: 2. Gather the data
+
+Purpose: Tests the setup on one healthy company (Walmart) and one failed
+company (Bed Bath & Beyond) before downloading all 20. Saves the raw
+response untouched.
+
+Run in: Colab or local Python
+
+Status: Run.
+
+What it showed
+
+-   Walmart: entity name WALMART INC., 478 us-gaap tags.
+
+-   Bed Bath & Beyond: entity name 20230930-DK-BUTTERFLY-1, INC., 393
+    us-gaap tags.
+
+-   Note: this version saves to a relative raw/ folder. In Colab that
+    folder is temporary, so the final extraction (script 5) saves to
+    Google Drive instead.
+
+Code
+
+  import requests, json, time
+
+  from pathlib import Path
+
+  headers = {"User-Agent": "Your Name your.email@example.com"}
+
+  Path("raw").mkdir(exist_ok=True)
+
+  test_companies = {104169: "Walmart", 886158: "Bed Bath & Beyond
+  (original)"}
+
+  for cik, label in test_companies.items():
+
+  out = Path(f"raw/{cik:010d}.json")
+
+  if out.exists():
+
+  print(f"{label}: already saved, skipping")
+
+  continue
+
+  url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
+
+  r = requests.get(url, headers=headers)
+
+  if r.status_code != 200:
+
+  print(f"{label}: FAILED with status {r.status_code}")
+
+  continue
+
+  out.write_text(r.text) # save the RAW response untouched
+
+  data = r.json()
+
+  n_tags = len(data["facts"].get("us-gaap", {}))
+
+  print(f"{label}: saved. Entity name = {data['entityName']}, us-gaap
+  tags = {n_tags}")
+
+  time.sleep(0.12)
+
+Script 5: Download all 20 companies (final extraction)
+
+File: 05_colab_extract_all.py
+
+Stage: 2. Gather the data
+
+Purpose: Mounts Google Drive, reads companies.csv, downloads one raw
+JSON file per company into raw/ (skipping files already saved), then
+checks that each file holds the expected company. The # %% lines mark
+the four separate Colab cells.
+
+Run in: Google Colab (four cells, run in order)
+
+Status: Run. 20 companies loaded, 20 JSON files confirmed in raw/, no
+errors.
+
+What it showed
+
+-   Safe to rerun: existing files are skipped, so only missing or failed
+    companies are retried.
+
+-   Waits 0.2 seconds between requests, well under the SEC limit of 10
+    requests per second, and sends a User-Agent with name and email as
+    the SEC requires.
+
+Code
+
+  # %% [Cell 1] Connect Google Drive (a permission pop-up appears the
+  first time)
+
+  from google.colab import drive
+
+  drive.mount('/content/drive')
+
+  # %% [Cell 2] Settings and folders
+
+  import json, time
+
+  import pandas as pd
+
+  import requests
+
+  from pathlib import Path
+
+  BASE = Path("/content/drive/MyDrive/retail_risk_project")
+
+  RAW = BASE / "raw"
+
+  RAW.mkdir(parents=True, exist_ok=True)
+
+  HEADERS = {"User-Agent": "Your Name your.email@example.com"} # use
+  your real name + email
+
+  companies = pd.read_csv(BASE / "companies.csv")
+
+  print(len(companies), "companies loaded")
+
+  # %% [Cell 3] Download one raw JSON file per company (safe to rerun:
+  skips saved files)
+
+  results = []
+
+  for _, row in companies.iterrows():
+
+  cik = int(row["cik"])
+
+  out = RAW / f"{cik:010d}.json"
+
+  if out.exists():
+
+  results.append((row["ticker"], "already saved"))
+
+  continue
+
+  url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
+
+  try:
+
+  r = requests.get(url, headers=HEADERS, timeout=60)
+
+  except requests.RequestException as e:
+
+  results.append((row["ticker"], f"ERROR: {e}"))
+
+  continue
+
+  if r.status_code == 200:
+
+  out.write_text(r.text)
+
+  results.append((row["ticker"], f"saved ({len(r.text)/1e6:.1f} MB)"))
+
+  else:
+
+  results.append((row["ticker"], f"FAILED, status {r.status_code}"))
+
+  time.sleep(0.2)
+
+  for ticker, status in results:
+
+  print(f"{ticker:12} {status}")
+
+  # %% [Cell 4] Check: does each file contain the company we expect?
+
+  print(len(list(RAW.glob("*.json"))), "files in raw/\n")
+
+  for _, row in companies.iterrows():
+
+  f = RAW / f"{int(row['cik']):010d}.json"
+
+  if f.exists():
+
+  name = json.load(open(f))["entityName"]
+
+  print(f"{row['ticker']:12} {name}")
+
+  else:
+
+  print(f"{row['ticker']:12} MISSING")
+
+5. Stage 3: Understand the data
+
+Script 6: Which XBRL tags exist for each metric?
+
+File: 06_explore_tag_availability.py
+
+Stage: 3. Understand the data
+
+Purpose: For each metric we need, checks which candidate tags a company
+actually uses, how many records each has, and the date range covered.
+The output is the first draft of the data dictionary.
+
+Run in: Colab (working folder set to the project folder)
+
+Status: Run on Walmart and Bed Bath & Beyond.
+
+What it showed
+
+-   Walmart reports no GrossProfit tag; Bed Bath & Beyond does (264
+    records). Gross profit may have to be calculated as revenue minus
+    cost of goods.
+
+-   Companies switch tags over time, for example Bed Bath & Beyond:
+    Revenues (2016 to 2018) then RevenueFromContract... (2017 to 2023);
+    CostOfRevenue then CostOfGoodsAndServicesSold; LongTermDebt then
+    LongTermDebtNoncurrent.
+
+-   Bed Bath & Beyond's data ends at the period ended 2023-02-25;
+    Walmart's runs to 2026-07-31.
+
+Code
+
+  import json
+
+  import pandas as pd
+
+  files = {
+
+  "Walmart": "raw/0000104169.json",
+
+  "Bed Bath & Beyond": "raw/0000886158.json",
+
+  }
+
+  # Candidate XBRL tags for each metric we need
+
+  candidates = {
+
+  "Revenue": ["Revenues",
+  "RevenueFromContractWithCustomerExcludingAssessedTax",
+  "SalesRevenueNet"],
+
+  "Cost of goods": ["CostOfRevenue", "CostOfGoodsAndServicesSold"],
+
+  "Gross profit": ["GrossProfit"],
+
+  "Inventory": ["InventoryNet"],
+
+  "Long-term debt": ["LongTermDebt", "LongTermDebtNoncurrent"],
+
+  "Current assets": ["AssetsCurrent"],
+
+  "Current liabilities": ["LiabilitiesCurrent"],
+
+  "Equity": ["StockholdersEquity"],
+
+  "Net income": ["NetIncomeLoss"],
+
+  "Operating cash flow": ["NetCashProvidedByUsedInOperatingActivities"],
+
+  "Capex": ["PaymentsToAcquirePropertyPlantAndEquipment"],
+
+  }
+
+  rows = []
+
+  for company, path in files.items():
+
+  facts = json.load(open(path))["facts"]["us-gaap"]
+
+  for metric, tags in candidates.items():
+
+  for tag in tags:
+
+  recs = facts.get(tag, {}).get("units", {}).get("USD", [])
+
+  if recs:
+
+  df = pd.DataFrame(recs)
+
+  rows.append([company, metric, tag, len(df), df["end"].min(),
+  df["end"].max()])
+
+  else:
+
+  rows.append([company, metric, tag, 0, "-", "-"])
+
+  report = pd.DataFrame(rows, columns=["company", "metric", "tag",
+  "records", "first_end", "last_end"])
+
+  pd.set_option("display.width", 200)
+
+  print(report.to_string(index=False))
+
+Script 7: Duplicates, extra tags and filing dates
+
+File: 07_explore_duplicates_and_filings.py
+
+Stage: 3. Understand the data
+
+Purpose: (A) Shows how the same period appears in several filings. (B)
+Searches for other revenue and income tags that fill gaps. (C) Lists Bed
+Bath & Beyond's last filings to test for look-ahead bias.
+
+Run in: Colab
+
+Status: Run.
+
+What it showed
+
+-   The fy and fp labels describe the filing, not the data point (the
+    same balance-sheet date appeared under different fiscal labels).
+    Periods must be identified by the end date.
+
+-   Bed Bath & Beyond's missing history sits under other tags:
+    SalesRevenueGoodsNet (2008 to 2018) for revenue; ProfitLoss and
+    NetIncomeLossAvailableToCommonStockholdersBasic for net income.
+
+-   Last 10-Q filed 2023-01-26 (61 days after quarter end); the final
+    10-K was filed 2023-06-14, after the bankruptcy. Using it would be
+    look-ahead bias.
+
+Code
+
+  import json
+
+  import pandas as pd
+
+  pd.set_option("display.width", 200)
+
+  def load(path):
+
+  return json.load(open(path))["facts"]["us-gaap"]
+
+  wmt = load("raw/0000104169.json")
+
+  bbby = load("raw/0000886158.json")
+
+  # A. What do raw records and duplicates look like?
+
+  recs = pd.DataFrame(wmt["InventoryNet"]["units"]["USD"])
+
+  print(recs[["end", "val", "form", "fy", "fp",
+  "filed"]].sort_values(["end", "filed"]).tail(12))
+
+  # B. Other revenue / income tags for Bed Bath & Beyond
+
+  for word in ["Revenue", "Sales", "NetIncome", "ProfitLoss"]:
+
+  print("\n", word)
+
+  for tag, v in bbby.items():
+
+  if word.lower() in tag.lower() and "USD" in v["units"]:
+
+  r = pd.DataFrame(v["units"]["USD"])
+
+  print(f" {tag:70} {len(r):4} {r['end'].min()} -> {r['end'].max()}")
+
+  # C. Bed Bath & Beyond's latest filings (checks for look-ahead bias)
+
+  r = pd.DataFrame(bbby["GrossProfit"]["units"]["USD"])
+
+  print(r[["start", "end", "form", "fp",
+  "filed"]].drop_duplicates().sort_values("filed").tail(8))
+
+Script 8: First clean quarterly revenue series
+
+File: 08_explore_quarterly_revenue.py
+
+Stage: 3. Understand the data
+
+Purpose: Builds one row per quarter from the raw records (keeping the
+best tag and the earliest filing), counts periods where values changed
+between filings, and computes days from period end to filing.
+
+Run in: Colab
+
+Status: Run on both test companies.
+
+What it showed
+
+-   Walmart: 64 quarters; 9 periods where the Revenues tag shows
+    different values across filings (to be investigated). Bed Bath &
+    Beyond: 55 quarters; 0 changed.
+
+-   Recent Q4 values are absent, as expected: Q4 appears only inside the
+    annual 10-K and must be derived.
+
+-   Walmart's two revenue tags differ by about 1% in recent quarters
+    (consistent with one including membership income; to be confirmed).
+
+-   Bed Bath & Beyond's revenue fell roughly 25% to 33% year over year
+    across 2021 to 2022 quarters.
+
+-   Days to file: Walmart steady at 28 to 38; Bed Bath & Beyond 32 to 40
+    until its final quarterly report took 61 days (supports H4).
+
+Code
+
+  import json
+
+  import pandas as pd
+
+  pd.set_option("display.width", 200)
+
+  def load(path):
+
+  return json.load(open(path))["facts"]["us-gaap"]
+
+  def get_series(facts, tags, kind):
+
+  """One row per period end. kind: 'quarter', 'annual' or 'instant'
+  (balance sheet)."""
+
+  frames = []
+
+  for priority, tag in enumerate(tags):
+
+  recs = facts.get(tag, {}).get("units", {}).get("USD", [])
+
+  if recs:
+
+  d = pd.DataFrame(recs)
+
+  d["tag"], d["priority"] = tag, priority
+
+  frames.append(d)
+
+  df = pd.concat(frames, ignore_index=True)
+
+  if "start" not in df:
+
+  df["start"] = None
+
+  df["end"] = pd.to_datetime(df["end"])
+
+  df["filed"] = pd.to_datetime(df["filed"])
+
+  if kind == "instant":
+
+  df = df[df["start"].isna()]
+
+  else:
+
+  days = (df["end"] - pd.to_datetime(df["start"])).dt.days
+
+  df = df[days.between(80, 100)] if kind == "quarter" else
+  df[days.between(350, 380)]
+
+  changed = (df.groupby(["end", "tag"])["val"].nunique() > 1).sum()
+
+  print(f" periods where one tag shows different values across filings:
+  {changed}")
+
+  df = df.sort_values(["end", "priority", "filed"])
+
+  out = df.groupby("end").head(1).copy() # best tag, earliest filing
+
+  out["days_to_file"] = (out["filed"] - out["end"]).dt.days
+
+  return out[["end", "val", "tag", "form", "filed", "days_to_file"]]
+
+  companies = {
+
+  "Walmart": ("raw/0000104169.json", ["Revenues"]),
+
+  "Bed Bath & Beyond": ("raw/0000886158.json",
+
+  ["RevenueFromContractWithCustomerExcludingAssessedTax",
+  "SalesRevenueGoodsNet", "Revenues"]),
+
+  }
+
+  for name, (path, tags) in companies.items():
+
+  print(name)
+
+  s = get_series(load(path), tags, "quarter")
+
+  print(s.tail(8).to_string(index=False))
+
+  print(f" quarters found: {len(s)} | first: {s['end'].min().date()} |
+  last: {s['end'].max().date()}\n")
+
+  # Do Walmart's two revenue tags measure the same thing?
+
+  w = load("raw/0000104169.json")
+
+  for tag in ["Revenues",
+  "RevenueFromContractWithCustomerExcludingAssessedTax"]:
+
+  s = get_series(w, [tag], "quarter")
+
+  print(tag)
+
+  print(s.tail(2)[["end", "val"]].to_string(index=False))
+
+6. Stage 4 drafts (not yet run on real files)
+
+These two scripts were written to fix the problems found in Stage 3.
+Their logic was tested on a small dataset built to look like the SEC
+files (it ignored 6- and 9-month figures, kept the earliest filing when
+values were restated, derived Q4 as annual minus three quarters, and
+skipped a year with a missing quarter). They have not yet been run on
+the real downloaded files, so treat them as drafts until they are.
+
+Script 9: Reusable helper functions (save as sec_utils.py)
+
+File: 09_sec_utils.py
+
+Stage: 4. Clean the data (draft)
+
+Purpose: Functions to load a company file, build a clean series for any
+metric, list periods whose values changed between filings, and derive Q4
+for flow items (revenue, income, cash flow).
+
+Run in: Saved as sec_utils.py in the project folder, then imported
+
+Status: Drafted; tested on synthetic data only.
+
+Code
+
+  import json
+
+  import pandas as pd
+
+  def load_facts(path):
+
+  """Open a saved companyfacts file and return the us-gaap section."""
+
+  return json.load(open(path))["facts"]["us-gaap"]
+
+  def _records(facts, tags):
+
+  """Stack the records of every tag in the list, remembering each tag's
+  priority."""
+
+  frames = []
+
+  for priority, tag in enumerate(tags):
+
+  recs = facts.get(tag, {}).get("units", {}).get("USD", [])
+
+  if recs:
+
+  d = pd.DataFrame(recs)
+
+  d["tag"] = tag
+
+  d["priority"] = priority
+
+  frames.append(d)
+
+  if not frames:
+
+  return pd.DataFrame()
+
+  df = pd.concat(frames, ignore_index=True)
+
+  if "start" not in df:
+
+  df["start"] = None
+
+  df["start"] = pd.to_datetime(df["start"])
+
+  df["end"] = pd.to_datetime(df["end"])
+
+  df["filed"] = pd.to_datetime(df["filed"])
+
+  return df
+
+  def _filter(df, kind):
+
+  """Keep only one type of period: 'quarter', 'annual' or 'instant'
+  (balance sheet)."""
+
+  if kind == "instant":
+
+  return df[df["start"].isna()]
+
+  days = (df["end"] - df["start"]).dt.days
+
+  low, high = (80, 100) if kind == "quarter" else (350, 380)
+
+  return df[days.between(low, high)]
+
+  def get_series(facts, tags, kind):
+
+  """One row per period: best-priority tag first, then earliest filing
+  date."""
+
+  df = _records(facts, tags)
+
+  if df.empty:
+
+  return df
+
+  df = _filter(df, kind).sort_values(["end", "priority", "filed"])
+
+  out = df.groupby("end").head(1).copy()
+
+  out["days_to_file"] = (out["filed"] - out["end"]).dt.days
+
+  cols = ["start", "end", "val", "tag", "form", "filed", "days_to_file"]
+
+  return out[cols].reset_index(drop=True)
+
+  def changed_periods(facts, tags, kind):
+
+  """Show every period where the SAME tag has different values in
+  different filings."""
+
+  df = _filter(_records(facts, tags), kind)
+
+  n = df.groupby(["end", "tag"])["val"].nunique().reset_index()
+
+  bad = n[n["val"] > 1][["end", "tag"]]
+
+  out = df.merge(bad, on=["end", "tag"])
+
+  return out.sort_values(["end", "filed"])[["end", "tag", "val", "form",
+  "filed"]]
+
+  def add_q4(quarters, annual):
+
+  """Add Q4 = annual total minus the three quarters inside that year
+  (flow items only)."""
+
+  rows, already, incomplete = [], 0, 0
+
+  for _, a in annual.iterrows():
+
+  if (quarters["end"] == a["end"]).any():
+
+  already += 1 # Q4 was reported directly
+
+  continue
+
+  inside = quarters[(quarters["end"] > a["start"]) & (quarters["end"] <
+  a["end"])]
+
+  if len(inside) != 3:
+
+  incomplete += 1 # can't derive safely
+
+  continue
+
+  rows.append({
+
+  "start": inside["end"].max() + pd.Timedelta(days=1),
+
+  "end": a["end"],
+
+  "val": a["val"] - inside["val"].sum(),
+
+  "tag": a["tag"],
+
+  "form": "10-K (derived Q4)",
+
+  "filed": a["filed"],
+
+  "days_to_file": a["days_to_file"],
+
+  })
+
+  print(f" Q4 derived: {len(rows)} | already present: {already} |
+  skipped (not 3 quarters): {incomplete}")
+
+  out = pd.concat([quarters, pd.DataFrame(rows)], ignore_index=True)
+
+  return out.sort_values("end").reset_index(drop=True)
+
+Script 10: Q4 derivation, tag overlap and the as-of cutoff
+
+File: 10_explore_q4_and_asof.py
+
+Stage: 4. Clean the data (draft)
+
+Purpose: Uses sec_utils.py to (1) list changed Walmart revenue periods,
+(2) print the SEC's own tag descriptions, (3) check that switching Bed
+Bath & Beyond revenue tags does not create a fake jump, and (4) add Q4,
+year-over-year change and the as-of filter.
+
+Run in: Colab, after sec_utils.py is saved
+
+Status: Drafted; not yet run. The bankruptcy date in it (2023-04-23)
+must be verified against the company's 8-K.
+
+Code
+
+  # Requires 09_sec_utils.py to be saved in the same folder as
+  sec_utils.py
+
+  import pandas as pd
+
+  from sec_utils import load_facts, get_series, changed_periods, add_q4
+
+  pd.set_option("display.width", 200)
+
+  wmt = load_facts("raw/0000104169.json")
+
+  bbby = load_facts("raw/0000886158.json")
+
+  BBBY_TAGS = ["RevenueFromContractWithCustomerExcludingAssessedTax",
+
+  "SalesRevenueGoodsNet", "Revenues"]
+
+  # 1. Walmart: which periods have different values in different
+  filings?
+
+  print("1. Walmart 'Revenues' - periods with changed values")
+
+  print(changed_periods(wmt, ["Revenues"],
+  "quarter").to_string(index=False))
+
+  # 2. What does the SEC say each Walmart revenue tag means?
+
+  print("\n2. Tag meanings")
+
+  for tag in ["Revenues",
+  "RevenueFromContractWithCustomerExcludingAssessedTax"]:
+
+  print(tag, "|", wmt[tag].get("label"), "|",
+  str(wmt[tag].get("description"))[:200])
+
+  # 3. Bed Bath & Beyond: does switching revenue tags create a fake
+  jump?
+
+  old = get_series(bbby, ["SalesRevenueGoodsNet"],
+  "quarter").set_index("end")["val"]
+
+  new = get_series(bbby,
+  ["RevenueFromContractWithCustomerExcludingAssessedTax"],
+  "quarter").set_index("end")["val"]
+
+  both = pd.concat([old, new], axis=1, keys=["old_tag",
+  "new_tag"]).dropna()
+
+  both["diff_%"] = ((both["new_tag"] / both["old_tag"] - 1) *
+  100).round(2)
+
+  print("\n3. Overlap of BBBY old vs new revenue tag")
+
+  print(both.to_string())
+
+  # 4. Full quarterly series with Q4, year-over-year change, and the
+  as-of cutoff
+
+  print("\n4. Bed Bath & Beyond with Q4")
+
+  q = get_series(bbby, BBBY_TAGS, "quarter")
+
+  a = get_series(bbby, BBBY_TAGS, "annual")
+
+  full = add_q4(q, a)
+
+  full["yoy_%"] = (full["val"].pct_change(4) * 100).round(1)
+
+  print(full[["end", "val", "form", "filed", "yoy_%",
+  "days_to_file"]].tail(9).to_string(index=False))
+
+  DISTRESS = pd.Timestamp("2023-04-23") # verify against the company's
+  8-K (Item 1.03)
+
+  visible = full[full["filed"] < DISTRESS]
+
+  print("\nLast quarter visible to the public before the bankruptcy:",
+  visible["end"].max().date())
+
+  print("Rows that would be look-ahead:", len(full) - len(visible))
+
+7. Rules decided so far
+
+-   Key everything on CIK, never on ticker or company name.
+
+-   Identify each period by its end date; compute its length from the
+    start date (about 91 days is a quarter, about 365 days is a year).
+    Never rely on the fy and fp labels.
+
+-   When one period appears in several filings, keep the
+    highest-priority tag, then the earliest filed date (the figure as
+    first reported).
+
+-   As-of rule for testing the hypotheses: only use records whose filed
+    date is before the distress date, so the evidence was public at the
+    time (avoids look-ahead bias).
+
+-   Define the tag priority list separately for each company.
+
+-   Flow items (revenue, income, cash flow) need Q4 derived as annual
+    minus the first three quarters; balance-sheet items do not.
+
+Data dictionary, version 1 (draft)
+
+  ------------------------------------------------------------------------------------------
+  Metric         Tag priority                                  Notes
+  -------------- --------------------------------------------- -----------------------------
+  Revenue        RevenueFromContract... > Revenues >           Walmart: use Revenues
+                 SalesRevenueNet / SalesRevenueGoodsNet        (continuous 2008 to 2026).
+                                                               Check tag overlaps per
+                                                               company.
+
+  Cost of goods  CostOfGoodsAndServicesSold > CostOfRevenue    
+
+  Gross profit   GrossProfit, else revenue minus cost of goods Validate the calculation on
+                                                               Bed Bath & Beyond.
+
+  Inventory      InventoryNet                                  Balance sheet; Q4 available
+                                                               directly.
+
+  Debt           LongTermDebtNoncurrent plus current portion   Current-portion tag still to
+                                                               be found.
+
+  Current assets AssetsCurrent, LiabilitiesCurrent             Balance sheet.
+  / liabilities                                                
+
+  Equity         StockholdersEquity                            
+
+  Net income     NetIncomeLoss; ProfitLoss for early years     Compare with the
+                                                               common-stockholders tag where
+                                                               both exist.
+
+  Operating cash NetCashProvidedByUsedInOperatingActivities;   Year-to-date figures;
+  flow, capex    PaymentsToAcquirePropertyPlantAndEquipment    subtract to get single
+                                                               quarters.
+  ------------------------------------------------------------------------------------------
+
+8. Notes for GitHub
+
+-   Save each script as a .py file with the names used here, and put
+    sec_utils.py in the project root.
+
+-   Replace the User-Agent in every script with a placeholder such as
+    "Your Name your.email@example.com" before committing, so your
+    personal email is not public. The SEC requires a real contact when
+    you run the scripts.
+
+-   Add raw/ to a .gitignore file. The raw JSON files are large and can
+    be re-created by running script 5.
+
+-   Commit companies.csv. It documents your sample, including the
+    confirmed CIKs and notes on each company.
+
+-   Write the README around the problem statement and hypotheses in
+    section 1, and list the lessons from section 5 as your data-quality
+    findings.

@@ -1,0 +1,3 @@
+leverage,obs,companies,auc,pooled,above_half,loo,ci95,ci95_year,size_only_auc,median_controls
+lev2,49,19,0.658,0.67,15/19,0.64 to 0.69,0.52 to 0.78,0.53 to 0.86,0.54,15
+lev3,55,20,0.606,0.62,14/20,0.59 to 0.63,0.47 to 0.74,0.45 to 0.84,0.534,9
