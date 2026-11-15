@@ -44,11 +44,11 @@
 > [!IMPORTANT]
 > This is a *relative stress ranking among retailers*. It is not a forecast and not a probability of failure.
 
-![Verdict page](docs/images/page1_verdict.png)
+![Verdict page](docs/images/verdict.png)
 
 ---
 
-## ❓ 1. Problem statement
+##  1. Problem statement
 
 US retailers run on thin margins, heavy inventory and large lease and debt commitments. When consumer demand weakens, the pressure builds in the accounts well before a bankruptcy filing. But two things make it hard to turn that into a reliable early warning:
 
@@ -57,7 +57,7 @@ US retailers run on thin margins, heavy inventory and large lease and debt commi
 
 **The question:** using only information that was public on each date, do gross-margin, inventory and leverage signals rank retailers that later failed as riskier than healthy retailers, and how confident can we be in the answer?
 
-## 🎯 2. Business objective
+##  2. Business objective
 
 Give a credit, supplier-risk or equity-research team a **transparent, reproducible way to triage retailers by early financial stress**, and an honest statement of how far to trust it.
 
@@ -71,9 +71,8 @@ Specifically:
 | Put the evidence in front of decision-makers | A five-page Power BI report on a MySQL layer, with a pre-registered verdict |
 | State the limits plainly | Robustness checks, event-period cuts, and a data-quality page |
 
-## 🧭 3. Approach
+## 3. Approach
 
-```mermaid
 flowchart LR
   A["🏛️ SEC EDGAR<br/>XBRL JSON"]:::src --> B["1 Extract<br/>keyed on CIK"]:::step
   B --> C["2 Understand<br/>coverage, dictionary,<br/>quirks log"]:::step
@@ -82,14 +81,9 @@ flowchart LR
   E --> F["5 Freeze<br/>protocol v1.3<br/>SHA-256"]:::lock
   F --> G["6 Held-out test<br/>22 failed,<br/>38 controls,<br/>run once"]:::test
   G --> H["7 Serve<br/>MySQL to<br/>Power BI"]:::out
-  classDef src fill:#1f3a5f,stroke:#1f3a5f,color:#fff
-  classDef step fill:#1f6f8b,stroke:#1f6f8b,color:#fff
-  classDef lock fill:#6f42c1,stroke:#6f42c1,color:#fff
-  classDef test fill:#c9772b,stroke:#c9772b,color:#fff
-  classDef out fill:#107c10,stroke:#107c10,color:#fff
 ```
 
-### 🧮 The score
+### The score
 
 Three signals, each converted to a percentile against a fixed reference group of 12 design companies on the same date, then averaged with equal weights:
 
@@ -101,14 +95,14 @@ Three signals, each converted to a percentile against a fixed reference group of
 
 Rules fixed before scoring: a quarter is used only from its **public date**, a company's latest public quarter may be at most **135 days old**, at least 5 reference companies are needed, and quarters ending 2020Q2 to 2021Q4 (COVID) are blanked.
 
-### 🔒 The discipline that makes the result credible
+### The discipline that makes the result credible
 
 - **As-of dating.** Each quarter becomes usable on the latest filing date among its inputs. A leakage audit found **0 of 62** scored observations dated on or after the event filing.
 - **Pre-registration.** Success criteria, the control rule (within 3x of the failed company's sales), the minimum sample (12 scored failures per version) and the reading rules were fixed and hashed before any held-out score existed. The test ran twice on the same day, with identical output; the repeat is logged, not hidden.
 - **No tuning on the test set.** The equal weights were set in advance. Re-weighting on the same eight design failures would only have fitted them.
 - **Reading rules for ambiguity**, fixed beforehand: which interval decides the verdict, how early quarters count as extra negatives, and that the four event-period cuts are descriptive only.
 
-## 🧰 4. Tools and techniques
+## 4. Tools and techniques
 
 | | Area | What I used |
 |---|---|---|
@@ -120,7 +114,7 @@ Rules fixed before scoring: a quarter is used only from its **public date**, a c
 | 🛠️ | Data engineering | Earliest-filed-value rule, Q4 derivation (annual minus three quarters), tag stitching with a 1% agreement rule, per-company debt formulas, regression test against earlier outputs |
 | 🔁 | Reproducibility | Protocol hash, run logs, seeded randomness, versioned scripts |
 
-## 🗂️ 5. Data and scope
+##  5. Data and scope
 
 - **Design sample (20 retailers):** 6 healthy (WMT, COST, TGT, HD, TJX, ROST), 6 under pressure (KSS, M, WOOF, DBI, BGFV, PLCE), 8 failed (BBBY, BIG, CONN, EXPR, JOAN, PRTY, RAD, TUEM). Used to design and stress-test the score.
 - **Held-out sample:** 22 failed retailers and 38 controls (40 candidates, 2 dropped by the three-input rule), plus 36 documented exclusions. Never used to design the score.
@@ -129,9 +123,9 @@ Rules fixed before scoring: a quarter is used only from its **public date**, a c
 
 ![Data quality page](docs/images/page5_data_quality.png)
 
-## 💡 6. Key insights
+##  6. Key insights
 
-### 🔎 6.1 Data and EDA insights (what the raw files taught me)
+###  6.1 Data and EDA insights (what the raw files taught me)
 
 1. **Period labels lie.** The SEC's `fy`/`fp` fields describe the *filing*, not the data point. The same balance-sheet date appeared under two different fiscal labels. Periods are identified by end date and length instead.
 2. **Look-ahead bias is the biggest hidden risk.** Bed Bath & Beyond's last 10-K was filed on 14 June 2023, after its April 2023 bankruptcy. Using it would have claimed warning signs "visible beforehand" from numbers nobody had yet. Every score uses the public date.
@@ -144,7 +138,7 @@ Rules fixed before scoring: a quarter is used only from its **public date**, a c
 9. **COVID dominates raw comparisons.** Debt rose 14% or more in the quarter to May 2020 at 10 of 12 comparable companies. Without a rule for 2020, every group average would measure the pandemic, not distress. Those quarters are blanked.
 10. **Regression discipline.** After every pipeline change, the 20 design companies reproduce their earlier values: **428 of 428** quarters unchanged.
 
-### 🧪 6.2 Design-phase findings (hypotheses, tested in-sample on 8 failed companies)
+###  6.2 Design-phase findings (hypotheses, tested in-sample on 8 failed companies)
 
 | Hypothesis | Outcome |
 |---|---|
@@ -159,7 +153,7 @@ Three things stood out:
 - **The comparison group matters, and size is a trap.** Against healthy-only controls the AUC rose to about 0.81 (0.87 to 0.91 in the later as-of re-test). But company size alone scored even higher against those six large retailers (about 0.98), and against controls matched to within 10x of size the score's AUC fell to 0.56 to 0.59. That is why the held-out test uses size-matched controls and prints a size-only benchmark beside every result.
 - **Robust to single companies.** Leaving out any one failed company never collapsed the AUC toward 0.5.
 
-### ⚖️ 6.3 The held-out verdict (22 failed companies, 38 controls, run once)
+###  6.3 The held-out verdict (22 failed companies, 38 controls, run once)
 
 | Finding | Result |
 |---|---|
@@ -176,7 +170,7 @@ Three things stood out:
 > [!NOTE]
 > An untested hypothesis, labelled as one: the score uses *changes* in leverage and ignores the *level* of debt, which may explain the weaker lev3 result. Testing it needs fresh data, because the held-out sample is now used.
 
-## 📊 7. The Power BI report
+##  7. The Power BI report
 
 Five pages on a MySQL layer (`retail_risk`), with buttons for navigation and pages 2 to 5 hidden from the tab bar.
 
@@ -188,15 +182,15 @@ Five pages on a MySQL layer (`retail_risk`), with buttons for navigation and pag
 | **4. Companies** | Which failed companies were ranked well and which were missed |
 | **5. Data quality** | Input coverage by company, late-dated quarters, what was fixed before scoring, and the known limits |
 
-![Evidence](docs/images/page2_evidence.png)
-![Event cuts](docs/images/page3_event_cuts.png)
-![Companies](docs/images/page4_companies.png)
+![Evidence](docs/images/evidence.png)
+![Event cuts](docs/images/events_cuts.png)
+![Companies](docs/images/companies.png)
 
-## ✅ 8. Business recommendations
+## 8. Business recommendations
 
 Split by how much the evidence supports each one.
 
-### 🟢 Supported by the held-out test
+### Supported by the held-out test
 
 1. **Use the score for triage, not for decisions.** It ranks retailers by relative stress; it does not give a probability or a date. Use it to decide *where to look first*, then apply judgement and a filing read.
 2. **Weight the time window.** Signal strength peaks 6 to 12 months before the event (lev2 AUC 0.71) and is close to chance beyond 18 months. Review top-ranked names every quarter, not once.
@@ -204,18 +198,18 @@ Split by how much the evidence supports each one.
 4. **Expect false alarms and plan for them.** About one in four to one in three healthy retailers will score above the typical failed company. Pair any flag with a second check before action.
 5. **Pause or separate the score during macro shocks.** It was weakest for events from Feb 2020 to Jan 2021. In a shock period, treat the ranking as unreliable until peers have normalised.
 
-### 🟡 Worth acting on in the data process
+###  Worth acting on in the data process
 
 6. **Score from the public date, never the period end.** Any monitoring built on period-end data will overstate how early the warning was. Build the as-of logic first.
 7. **Reconcile debt against filings before trusting any leverage signal.** In this project 6 of 18 automatically proposed debt formulas were wrong, and the errors changed the signal's direction for some failed companies.
 8. **Track late filing as a data-quality flag**, not as a predictor. In the design sample, filing delay carried no signal; but late filings do make the data unusable in real time.
 
-### 🔵 Hypotheses to test next (not yet evidence)
+###  Hypotheses to test next (not yet evidence)
 
 9. **Add a level-based leverage and liquidity signal.** The score ignores how much debt a company carries. Test this on fresh data under a new pre-registered protocol (v2), not on the held-out sample used here.
 10. **Run a forward test.** The repository already records live scores in an append-only, hashed ledger (`forward_test_ledger.csv`). Compare them with actual failures after 12 months. This is a true out-of-sample test and costs nothing but time.
 
-## ⚠️ 9. Limitations
+##  9. Limitations
 
 - **Small sample:** 19 to 20 scored failures per version; wide intervals. lev2's lower bound is 0.52, a narrow pass.
 - **Weak in the shock period** and thin before 2019 (4 to 7 reference companies in 2016 to 2018, some dated late: M, TGT, TJX, DBI).
@@ -263,7 +257,7 @@ Expected: lev2 🟢 **MET**, lev3 🔴 **NOT MET**, overall 🔴 **NOT MET**. Fu
 | SQL and BI | MySQL schema and views; five-page Power BI report with DAX, navigation and conditional formatting |
 | Communication | Plain-language findings, limitations stated up front, recommendations tied to evidence |
 
-## 🔗 Data source
+##  Data source
 
 SEC EDGAR XBRL `companyfacts`, accessed in 2026.
 
