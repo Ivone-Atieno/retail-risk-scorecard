@@ -73,15 +73,7 @@ Specifically:
 
 ## 3. Approach
 
-flowchart LR
-  A["🏛️ SEC EDGAR<br/>XBRL JSON"]:::src --> B["1 Extract<br/>keyed on CIK"]:::step
-  B --> C["2 Understand<br/>coverage, dictionary,<br/>quirks log"]:::step
-  C --> D["3 Clean<br/>Q4, tag stitching,<br/>debt formulas,<br/>public dates"]:::step
-  D --> E["4 Design<br/>20 companies,<br/>4 hypotheses,<br/>score"]:::step
-  E --> F["5 Freeze<br/>protocol v1.3<br/>SHA-256"]:::lock
-  F --> G["6 Held-out test<br/>22 failed,<br/>38 controls,<br/>run once"]:::test
-  G --> H["7 Serve<br/>MySQL to<br/>Power BI"]:::out
-```
+![1 Extract](https://img.shields.io/badge/1-Extract-1f3a5f?style=for-the-badge) ➜ ![2 Clean](https://img.shields.io/badge/2-Clean-1f6f8b?style=for-the-badge) ➜ ![3 Design](https://img.shields.io/badge/3-Design-1f6f8b?style=for-the-badge) ➜ ![4 Freeze](https://img.shields.io/badge/4-Freeze-6f42c1?style=for-the-badge) ➜ ![5 Test once](https://img.shields.io/badge/5-Test_once-c9772b?style=for-the-badge) ➜ ![6 Report](https://img.shields.io/badge/6-Report-107c10?style=for-the-badge)
 
 ### The score
 
